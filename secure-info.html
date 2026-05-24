@@ -340,34 +340,19 @@ NOXVAULT THREAT INTELLIGENCE NETWORK
 
 <script>
 
-<script>
+function switchPage(id,btn){
 
-function switchPage(id, btn){
-
-  // 隱藏所有頁面
   document.querySelectorAll('.section')
-  .forEach(v => v.classList.remove('active'));
+  .forEach(v=>v.classList.remove('active'));
 
-  // 取消所有按鈕狀態
   document.querySelectorAll('.nav-btn')
-  .forEach(v => v.classList.remove('active'));
+  .forEach(v=>v.classList.remove('active'));
 
-  // 顯示指定頁面
   document.getElementById(id)
   .classList.add('active');
 
-  // 啟用按鈕狀態
   btn.classList.add('active');
-
-  // ===== 修正切換頁面保留滾動位置問題 =====
-  // 切換頁面時自動回到最上方
-  window.scrollTo({
-    top: 0,
-    behavior: 'instant'
-  });
 }
-
-</script>
 
 const RSS_API =
 "https://YOUR-HF-SPACE.hf.space/api/news";
