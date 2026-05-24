@@ -9,1101 +9,1575 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+  box-sizing: border-box; margin: 0; padding: 0;
   border-radius: 0px !important;
   font-family: 'JetBrains Mono', 'Courier New', monospace;
 }
 :root {
-  --bg: #000000;
-  --bg2: #090909;
-  --bg3: #111111;
-  --bg4: #161616;
-  --b1: #1c1c1c;
-  --b2: #2c2c2c;
-  --b3: #3c3c3c;
-  --t1: #e0e0e0;
-  --t2: #888888;
-  --t3: #4a4a4a;
-  --g: #00ff88;
-  --g2: #00cc66;
-  --r: #ff2222;
-  --r2: #ff5555;
-  --y: #ffaa00;
-  --grid: rgba(255, 255, 255, 0.015);
+  --bg:#000; --bg2:#090909; --bg3:#111; --bg4:#161616;
+  --b1:#1c1c1c; --b2:#2c2c2c; --b3:#3c3c3c;
+  --t1:#e0e0e0; --t2:#888; --t3:#4a4a4a;
+  --g:#00ff88; --g2:#00cc66;
+  --r:#ff2222; --r2:#ff5555;
+  --y:#ffaa00; --y2:#ffcc44;
+  --bl:#0099ff;
+  --grid:rgba(255,255,255,0.015);
 }
 html {
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-x: hidden; overflow-y: auto;
   overscroll-behavior: none;
-  background: var(--bg);
-  color: var(--t1);
+  -webkit-font-smoothing: antialiased;
+  background: var(--bg); color: var(--t1);
 }
 body {
-  overflow-x: hidden;
-  min-height: 100vh;
-  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  overflow-x: hidden; min-height: 100vh;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--b3); }
 
-/* PWA LOCK OVERLAY */
+/* ── OFFLINE OVERLAY ── */
 #offline {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  background: #000000;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: #000; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
 }
 #offline.on { display: flex; }
-.off-t {
-  font-size: clamp(1rem, 4vw, 2rem);
-  font-weight: 800;
-  letter-spacing: .2em;
-  color: var(--r);
+.off-title {
+  font-size: clamp(1rem, 4vw, 2rem); font-weight: 800;
+  letter-spacing: .2em; color: var(--r); text-transform: uppercase;
   animation: blink 1s step-end infinite;
 }
+.off-sub { font-size: .7rem; color: var(--t3); letter-spacing: .15em; }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* APP LAYOUT */
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+/* ── LAYOUT ── */
+#app { display: flex; flex-direction: column; min-height: 100vh; }
 header {
-  border-bottom: 1px solid var(--b1);
-  padding: 0 24px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(0, 0, 0, 0.95);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  border-bottom: 1px solid var(--b1); padding: 0 24px; height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(0,0,0,.95); position: sticky; top: 0; z-index: 100;
   backdrop-filter: blur(8px);
 }
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+.logo { display: flex; align-items: center; gap: 10px; }
 .gem {
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--g);
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 22px; height: 22px; border: 1px solid var(--g);
+  position: relative; display: flex; align-items: center; justify-content: center;
   animation: gp 4s ease-in-out infinite;
 }
-@keyframes gp { 0%, 100% { box-shadow: none; } 50% { box-shadow: 0 0 10px rgba(0,255,136,.3); } }
+@keyframes gp { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 10px rgba(0,255,136,.3)} }
 .gem::before {
-  content: '';
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  background: var(--g);
-  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  content: ''; position: absolute; width: 6px; height: 6px;
+  background: var(--g); clip-path: polygon(50% 0%,100% 50%,50% 100%,0% 50%);
 }
-.logo-t {
-  font-size: .95rem;
-  font-weight: 800;
-  letter-spacing: .2em;
-  color: #ffffff;
-}
+.logo-t { font-size: .95rem; font-weight: 800; letter-spacing: .2em; color: #fff; }
 .logo-t span { color: var(--g); }
 .hdr-r { display: flex; align-items: center; gap: 8px; }
 .lbtn {
-  background: transparent;
-  border: 1px solid var(--b2);
-  color: var(--t3);
-  padding: 4px 10px;
-  font-size: .65rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .15s;
+  background: transparent; border: 1px solid var(--b2); color: var(--t3);
+  padding: 4px 10px; font-size: .65rem; font-weight: 700;
+  cursor: pointer; transition: all .15s;
 }
-.lbtn.a, .lbtn:hover {
-  border-color: var(--g);
-  color: var(--g);
-  background: rgba(0, 255, 136, 0.03);
-}
+.lbtn.a, .lbtn:hover { border-color: var(--g); color: var(--g); background: rgba(0,255,136,.03); }
 
 main {
-  flex: 1;
-  max-width: 800px;
-  width: 100%;
-  margin: 0 auto;
-  padding: 32px 24px 64px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  flex: 1; max-width: 800px; width: 100%; margin: 0 auto;
+  padding: 32px 24px 64px; display: flex; flex-direction: column; gap: 20px;
 }
 .slbl {
-  font-size: .65rem;
-  font-weight: 700;
-  letter-spacing: .25em;
-  color: var(--t3);
-  text-transform: uppercase;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  font-size: .65rem; font-weight: 700; letter-spacing: .25em; color: var(--t3);
+  text-transform: uppercase; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 10px;
 }
-.slbl::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--b1);
-}
+.slbl::after { content: ''; flex: 1; height: 1px; background: var(--b1); }
 
-/* COMPREHENSIVE INTEGRATED UPLOAD VIEW (Occupies full rectangle block) */
+/* ── UPLOAD CONTAINER ── */
 .upload-container {
-  border: 1px solid var(--b2);
-  background: var(--bg2);
-  min-height: 190px;
-  position: relative;
-  transition: border-color .2s;
-  width: 100%;
+  border: 1px solid var(--b2); background: var(--bg2);
+  min-height: 190px; position: relative; transition: border-color .2s;
 }
+.upload-container.has-file { border-color: var(--g); }
+
 #drop-zone {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  cursor:pointer;
-  width: 100%;
-  min-height: 190px;
-  padding: 32px 24px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; cursor: pointer; width: 100%; min-height: 190px; padding: 32px 24px;
+  transition: background .2s;
 }
-#drop-zone.drag {
-  border-color: var(--g);
-  background: rgba(0, 255, 136, 0.02);
-}
-#drop-zone.busy {
-  cursor: not-allowed;
-}
-.drop-icon {
-  width: 24px;
-  height: 24px;
-  stroke: var(--t3);
-  fill: none;
-  transition: stroke .2s;
-}
-#drop-zone:hover .drop-icon {
-  stroke: var(--g);
-}
+#drop-zone.drag { background: rgba(0,255,136,.025); }
+#drop-zone.busy { cursor: not-allowed; }
+.drop-icon { width: 24px; height: 24px; stroke: var(--t3); fill: none; transition: stroke .2s; }
+#drop-zone:hover .drop-icon { stroke: var(--g); }
+.drop-txt { font-size: .8rem; font-weight: 700; color: var(--t1); }
+.drop-sub { font-size: .65rem; color: var(--t3); }
 
-/* FULL RECTANGLE FILLED STATE FOR UPLOADED FILE */
+/* ── FILE INFO VIEW ── */
 #file-info-view {
-  display: none;
-  width: 100%;
-  min-height: 190px;
-  background: var(--bg3);
-  border: 2px solid var(--g);
-  padding: 24px;
-  flex-direction: column;
-  justify-content: space-between;
+  display: none; width: 100%; min-height: 190px;
+  background: var(--bg3); padding: 22px;
+  flex-direction: column; gap: 14px; justify-content: space-between;
 }
-.f-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  border-bottom: 1px solid var(--b1);
-  padding-bottom: 14px;
-}
-.f-meta {
-  flex: 1;
-  overflow: hidden;
-}
-.f-name {
-  font-size: .9rem;
-  font-weight: 700;
-  color: #ffffff;
-  word-break: break-all;
-  margin-bottom: 4px;
-}
-.f-size {
-  font-size: .7rem;
-  color: var(--g);
-  font-weight: 500;
-}
+.f-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.f-meta { flex: 1; overflow: hidden; }
+.f-name { font-size: .88rem; font-weight: 700; color: #fff; word-break: break-all; margin-bottom: 3px; }
+.f-size { font-size: .7rem; color: var(--g); font-weight: 500; }
 .btn-clear {
-  background: transparent;
-  border: 1px solid var(--r);
-  color: var(--r);
-  padding: 4px 10px;
-  font-size: .65rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .15s;
-  flex-shrink: 0;
+  background: transparent; border: 1px solid var(--r); color: var(--r);
+  padding: 4px 10px; font-size: .65rem; font-weight: 700;
+  cursor: pointer; transition: all .15s; flex-shrink: 0;
 }
-.btn-clear:hover {
-  background: rgba(255, 34, 34, 0.08);
-}
-.f-crypto-box {
-  margin-top: 14px;
-}
-.crypto-lbl {
-  font-size: .6rem;
-  font-weight: 700;
-  color: var(--t3);
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-.crypto-val {
-  font-size: .75rem;
-  color: var(--t1);
-  word-break: break-all;
-  background: var(--bg);
-  padding: 8px;
-  border: 1px solid var(--b1);
-}
+.btn-clear:hover { background: rgba(255,34,34,.08); }
 
-/* ACTION BUTTON */
+/* SHA-256 section inside file-info */
+.sha-section { display: flex; flex-direction: column; gap: 4px; }
+.sha-lbl {
+  font-size: .58rem; font-weight: 700; color: var(--t3);
+  letter-spacing: .12em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.sha-dot { width: 5px; height: 5px; background: var(--g); display: inline-block; animation: pd 1.2s ease-in-out infinite; }
+@keyframes pd { 0%,100%{opacity:1} 50%{opacity:.3} }
+.sha-value {
+  font-size: .72rem; color: var(--g); word-break: break-all;
+  background: var(--bg); padding: 8px 10px; border: 1px solid var(--b1);
+  line-height: 1.5;
+}
+.sha-value.computing { color: var(--t3); font-style: italic; }
+.sha-value.error { color: var(--r); }
+
+/* ── SCAN BUTTON ── */
 #scan-btn {
-  width: 100%;
-  border: 1px solid var(--g);
-  background: transparent;
-  color: var(--g);
-  padding: 16px;
-  font-size: .8rem;
-  font-weight: 700;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: all .2s;
+  width: 100%; border: 1px solid var(--g); background: transparent; color: var(--g);
+  padding: 16px; font-size: .8rem; font-weight: 700; letter-spacing: .2em;
+  text-transform: uppercase; cursor: pointer; transition: all .2s;
+  position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
 }
-#scan-btn:hover:not(:disabled) {
-  background: rgba(0, 255, 136, 0.04);
-  box-shadow: 0 0 12px rgba(0, 255, 136, 0.15);
+#scan-btn::before {
+  content: ''; position: absolute; left: -100%; top: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0,255,136,.07), transparent);
+  transition: left .4s;
 }
-#scan-btn:disabled {
-  border-color: var(--b2);
-  color: var(--t3);
-  cursor: not-allowed;
+#scan-btn:hover:not(:disabled)::before { left: 100%; }
+#scan-btn:hover:not(:disabled) { background: rgba(0,255,136,.04); }
+#scan-btn.busy { border-color: var(--y); color: var(--y); }
+#scan-btn:disabled { border-color: var(--b2); color: var(--t3); cursor: not-allowed; }
+.spin {
+  width: 14px; height: 14px; border: 2px solid currentColor;
+  border-top-color: transparent; animation: sp .6s linear infinite;
+  display: none; flex-shrink: 0;
 }
+.spin.v { display: block; }
+@keyframes sp { to { transform: rotate(360deg); } }
 
-/* LIVE PIPELINE PROGRESS TRACKER */
+/* ── PIPELINE PROGRESS ── */
 #pipeline {
-  display: none;
-  flex-direction: column;
-  gap: 14px;
-  background: var(--bg2);
-  border: 1px solid var(--b1);
-  padding: 20px;
+  display: none; flex-direction: column; gap: 0;
+  background: var(--bg2); border: 1px solid var(--b1);
 }
 #pipeline.v { display: flex; }
-.pipe-step { display: flex; gap: 16px; align-items: flex-start; }
-.pipe-status-dot {
-  width: 10px;
-  height: 10px;
-  border: 2px solid var(--b3);
-  background: var(--bg);
-  margin-top: 4px;
-  flex-shrink: 0;
-  transition: all .2s;
+.pipe-header {
+  padding: 12px 18px 8px; font-size: .6rem; font-weight: 700;
+  letter-spacing: .2em; color: var(--t3); text-transform: uppercase;
+  border-bottom: 1px solid var(--b1);
 }
-.pipe-step.run .pipe-status-dot {
-  border-color: var(--y);
-  background: var(--y);
-  animation: blink .8s step-end infinite;
+.pipe-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 0; }
+.pipe-step { display: flex; gap: 0; }
+.pipe-left {
+  display: flex; flex-direction: column; align-items: center;
+  width: 32px; flex-shrink: 0; padding-top: 3px;
 }
-.pipe-step.ok .pipe-status-dot { border-color: var(--g); background: var(--g); }
-.pipe-step.err .pipe-status-dot { border-color: var(--r); background: var(--r); }
-.pipe-text { flex: 1; }
-.pipe-title { font-size: .7rem; font-weight: 700; color: var(--t3); }
-.pipe-step.run .pipe-title { color: var(--y); }
-.pipe-step.ok .pipe-title { color: var(--g); }
-.pipe-step.err .pipe-title { color: var(--r); }
-.pipe-desc { font-size: .65rem; color: var(--t3); margin-top: 2px; }
+.pipe-node {
+  width: 10px; height: 10px; border: 2px solid var(--b2);
+  background: var(--bg); flex-shrink: 0; transition: all .25s;
+}
+.pipe-node.run  { border-color: var(--y); background: var(--y); animation: blink .8s step-end infinite; }
+.pipe-node.ok   { border-color: var(--g); background: var(--g); }
+.pipe-node.err  { border-color: var(--r); background: var(--r); }
+.pipe-node.skip { border-color: var(--b3); background: transparent; }
+.pipe-vline { flex: 1; width: 1px; background: var(--b1); margin: 3px auto 0; min-height: 20px; }
+.pipe-content { flex: 1; padding-bottom: 16px; min-width: 0; padding-left: 14px; }
+.pipe-title { font-size: .7rem; font-weight: 700; color: var(--t3); line-height: 1.3; transition: color .2s; }
+.pipe-step .pipe-node.run  ~ * .pipe-title,
+.pipe-step.run  .pipe-title { color: var(--y); }
+.pipe-step.ok   .pipe-title { color: var(--g); }
+.pipe-step.err  .pipe-title { color: var(--r); }
+.pipe-step.skip .pipe-title { color: var(--t3); }
+.pipe-desc {
+  font-size: .64rem; color: var(--t3); margin-top: 3px; line-height: 1.55;
+  word-break: break-word;
+}
+.pipe-step.err  .pipe-desc { color: var(--r2); }
+.pipe-step.ok   .pipe-desc { color: var(--t3); }
+.pipe-elapsed { font-size: .57rem; color: var(--b3); margin-top: 2px; }
+/* force title color by parent class (JS sets class on .pipe-step) */
+.pipe-step.run  .pipe-title { color: var(--y) !important; }
+.pipe-step.ok   .pipe-title { color: var(--g) !important; }
+.pipe-step.err  .pipe-title { color: var(--r) !important; }
 
-/* ERROR PANEL */
+/* ── ERROR DASHBOARD ── */
 #err-dashboard {
-  display: none;
-  border: 1px solid var(--r);
-  background: var(--bg2);
-  padding: 20px;
-  flex-direction: column;
-  gap: 14px;
+  display: none; flex-direction: column; gap: 0;
+  border: 1px solid var(--r); background: var(--bg2);
 }
 #err-dashboard.v { display: flex; }
-.err-header {
-  color: var(--r);
-  font-size: .8rem;
-  font-weight: 800;
-  letter-spacing: .1em;
-  border-bottom: 1px solid rgba(255,34,34,0.2);
-  padding-bottom: 8px;
+.err-top {
+  background: rgba(255,34,34,.06); padding: 14px 18px;
+  display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid rgba(255,34,34,.2);
 }
-.err-section { font-size: .7rem; line-height: 1.6; }
-.err-lbl { color: var(--r2); font-weight: 700; margin-bottom: 2px; }
-.err-txt { color: var(--t2); }
+.err-icon { font-size: 1.1rem; animation: blink .8s step-end infinite; flex-shrink: 0; }
+.err-headline { font-size: .72rem; font-weight: 800; color: var(--r); letter-spacing: .1em; text-transform: uppercase; }
+.err-stage-tag { font-size: .6rem; color: var(--r2); margin-top: 2px; letter-spacing: .06em; }
+.err-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.err-block { display: flex; flex-direction: column; gap: 4px; }
+.err-block-lbl {
+  font-size: .58rem; font-weight: 700; letter-spacing: .15em;
+  color: var(--t3); text-transform: uppercase;
+}
+.err-block-txt { font-size: .7rem; color: var(--t2); line-height: 1.65; }
+.err-block-txt.danger { color: var(--r2); }
 .err-raw {
-  background: var(--bg3);
-  border: 1px solid var(--b2);
-  padding: 10px;
-  font-size: .6rem;
-  color: var(--y);
-  word-break: break-all;
-  max-height: 120px;
-  overflow-y: auto;
+  background: var(--bg3); border: 1px solid var(--b2); padding: 10px 12px;
+  font-size: .62rem; color: var(--y2); word-break: break-all;
+  max-height: 120px; overflow-y: auto; line-height: 1.65; white-space: pre-wrap;
 }
+.err-fixes { display: flex; flex-direction: column; gap: 5px; }
+.err-fix { font-size: .68rem; color: var(--t2); display: flex; gap: 8px; line-height: 1.55; }
+.err-fix::before { content: '→'; color: var(--y); font-weight: 700; flex-shrink: 0; }
+.err-actions { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 18px 18px; }
+.ea-btn {
+  background: transparent; border: 1px solid var(--b2); color: var(--t2);
+  padding: 8px 14px; font-size: .65rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: all .15s;
+}
+.ea-btn:hover { border-color: var(--g); color: var(--g); }
+.ea-btn.danger:hover { border-color: var(--r); color: var(--r); }
 
-/* SCAN RESULTS DASHBOARD */
+/* ── RESULTS ── */
 #results-dashboard {
-  display: none;
-  flex-direction: column;
-  gap: 20px;
+  display: none; flex-direction: column; gap: 20px;
+  animation: fiu .3s ease forwards;
 }
 #results-dashboard.v { display: flex; }
+@keyframes fiu { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* Danger banner */
+#danger-banner {
+  display: none; border: 2px solid var(--r);
+  background: rgba(255,34,34,.06); padding: 14px 18px;
+  align-items: center; gap: 14px;
+  animation: df .9s ease 4;
+}
+#danger-banner.v { display: flex; }
+@keyframes df { 0%,100%{background:rgba(255,34,34,.06)} 50%{background:rgba(255,34,34,.16)} }
+.db-ico { font-size: 1.2rem; flex-shrink: 0; animation: blink .7s step-end infinite; }
+.db-title { font-size: .75rem; font-weight: 800; color: var(--r); letter-spacing: .12em; text-transform: uppercase; }
+.db-sub { font-size: .64rem; color: var(--r2); margin-top: 3px; }
+
+/* Score hero */
 .hero-banner {
-  border: 1px solid var(--b2);
-  background: var(--bg2);
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
+  border: 1px solid var(--b2); background: var(--bg2);
+  padding: 22px; display: grid; grid-template-columns: auto 1fr; gap: 20px; align-items: center;
+  position: relative; overflow: hidden;
 }
-.hero-banner.danger { border-color: var(--r); background: rgba(255, 34, 34, 0.03); }
-.hero-banner.safe { border-color: var(--g); background: rgba(0, 255, 136, 0.02); }
-.score-circle {
-  width: 72px;
-  height: 72px;
-  border: 2px solid var(--b3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 800;
-  flex-shrink: 0;
+.hero-banner::before {
+  content: ''; position: absolute; top: -40%; right: -5%;
+  width: 200px; height: 200px; pointer-events: none;
+  background: radial-gradient(circle, var(--hero-glow, rgba(0,255,136,.04)) 0%, transparent 70%);
 }
-.hero-banner.danger .score-circle { border-color: var(--r); color: var(--r); }
-.hero-banner.safe .score-circle { border-color: var(--g); color: var(--g); }
-.verdict-info { flex: 1; }
-.verdict-title { font-size: .9rem; font-weight: 800; letter-spacing: .1em; }
-.hero-banner.danger .verdict-title { color: var(--r); }
-.hero-banner.safe .verdict-title { color: var(--g); }
-.verdict-target { font-size: .65rem; color: var(--t3); margin-top: 4px; word-break: break-all; }
+.hero-banner.danger { border-color: rgba(255,34,34,.4); --hero-glow: rgba(255,34,34,.06); }
+.hero-banner.safe   { border-color: rgba(0,255,136,.2); --hero-glow: rgba(0,255,136,.05); }
+.hero-banner.warn   { border-color: rgba(255,170,0,.2);  --hero-glow: rgba(255,170,0,.05); }
+.score-ring {
+  width: 80px; height: 80px; border: 2px solid var(--b3);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.score-ring.danger { border-color: var(--r); }
+.score-ring.safe   { border-color: var(--g); }
+.score-ring.warn   { border-color: var(--y); }
+.score-n { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+.score-ring.danger .score-n { color: var(--r); }
+.score-ring.safe   .score-n { color: var(--g); }
+.score-ring.warn   .score-n { color: var(--y); }
+.score-ring.nd     .score-n { color: var(--t3); font-size: .65rem; line-height: 1.4; text-align: center; }
+.score-u { font-size: .46rem; font-weight: 700; letter-spacing: .12em; color: var(--t3); margin-top: 4px; }
+.verdict-info { display: flex; flex-direction: column; gap: 4px; }
+.verdict-str  { font-size: 1rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.verdict-str.danger { color: var(--r); }
+.verdict-str.safe   { color: var(--g); }
+.verdict-str.warn   { color: var(--y); }
+.verdict-str.nd     { color: var(--t3); }
+.verdict-tgt { font-size: .66rem; color: var(--t3); word-break: break-all; }
+.verdict-chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.chip { font-size: .61rem; color: var(--t2); }
+.chip b { color: var(--t1); font-weight: 600; }
 
+/* Details grid */
 .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--b1); }
-.details-card { background: var(--bg2); padding: 16px; display: flex; flex-direction: column; gap: 6px; }
-.card-lbl { font-size: .6rem; font-weight: 700; color: var(--t3); letter-spacing: .1em; text-transform: uppercase; }
-.card-val { font-size: .85rem; font-weight: 700; color: var(--t1); }
+.details-card { background: var(--bg2); padding: 15px; display: flex; flex-direction: column; gap: 6px; }
+.card-lbl { font-size: .58rem; font-weight: 700; color: var(--t3); letter-spacing: .12em; text-transform: uppercase; }
+.card-val { font-size: .82rem; font-weight: 700; color: var(--t1); }
 .card-val.danger { color: var(--r); }
-.card-val.safe { color: var(--g); }
+.card-val.safe   { color: var(--g); }
+.card-val.warn   { color: var(--y); }
+.card-val.muted  { color: var(--t3); font-style: italic; font-size: .72rem; }
 
-.btn-pdf {
-  background: transparent;
-  border: 1px solid var(--b2);
-  color: var(--t2);
-  padding: 14px;
-  font-size: .7rem;
-  font-weight: 700;
-  letter-spacing: .1em;
-  cursor: pointer;
-  text-transform: uppercase;
-  text-align: center;
-  transition: all .15s;
+/* Memory notice */
+.mem-ok {
+  border: 1px solid rgba(0,255,136,.2); background: rgba(0,255,136,.025);
+  padding: 9px 14px; display: flex; align-items: center; gap: 9px;
+  font-size: .66rem; color: var(--g); letter-spacing: .05em;
 }
-.btn-pdf:hover { border-color: #ffffff; color: #ffffff; background: var(--bg3); }
+
+/* Engine breakdown */
+.eng-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(185px,1fr)); gap: 1px; background: var(--b1); }
+.eng-row {
+  background: var(--bg2); padding: 8px 12px;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: .64rem; transition: background .12s;
+}
+.eng-row:hover { background: var(--bg3); }
+.eng-name { color: var(--t2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.eng-res { font-weight: 700; flex-shrink: 0; }
+.eng-res.det { color: var(--r); }
+.eng-res.cl  { color: var(--t3); }
+
+/* Threats table */
+.tbl-wrap { border: 1px solid var(--b1); overflow-x: auto; }
+.thr-tbl { width: 100%; border-collapse: collapse; font-size: .68rem; min-width: 480px; }
+.thr-tbl th {
+  background: var(--bg3); border-bottom: 1px solid var(--b1);
+  padding: 8px 12px; text-align: left; font-weight: 700;
+  letter-spacing: .13em; color: var(--t3); text-transform: uppercase; font-size: .57rem;
+}
+.thr-tbl td { padding: 8px 12px; border-bottom: 1px solid var(--b1); color: var(--t1); vertical-align: middle; }
+.thr-tbl tr:last-child td { border-bottom: none; }
+.thr-tbl tr:hover td { background: var(--bg3); }
+.sv { display: inline-block; padding: 2px 6px; font-size: .54rem; font-weight: 700; letter-spacing: .1em; border: 1px solid currentColor; text-transform: uppercase; }
+.sc { color: var(--r); } .sh { color: #ff6600; } .sm { color: var(--y); } .sl { color: var(--bl); } .sok { color: var(--g); }
+
+/* PDF / action buttons */
+.act-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.act-btn {
+  flex: 1; min-width: 130px; background: transparent; border: 1px solid var(--b2);
+  color: var(--t2); padding: 12px 14px; font-size: .68rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; cursor: pointer; transition: all .15s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.act-btn:hover { border-color: var(--g); color: var(--g); background: rgba(0,255,136,.03); }
+.act-btn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; flex-shrink: 0; }
 
 footer {
-  border-top: 1px solid var(--b1);
-  padding: 16px 24px;
-  display: flex;
-  justify-content: space-between;
-  font-size: .6rem;
-  color: var(--t3);
-  margin-top: auto;
+  border-top: 1px solid var(--b1); padding: 14px 24px;
+  display: flex; justify-content: space-between; font-size: .6rem;
+  color: var(--t3); margin-top: auto;
 }
 
 @media(max-width:600px){
   main { padding: 16px 16px 40px; }
-  .hero-banner { flex-direction: column; text-align: center; gap: 16px; }
+  .hero-banner { grid-template-columns: 1fr; }
+  .score-ring { width: 64px; height: 64px; }
+  .score-n { font-size: 1.4rem; }
   .details-grid { grid-template-columns: 1fr; }
+  .eng-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
+<!-- OFFLINE OVERLAY -->
 <div id="offline" role="alert">
-  <div class="off-t">OFFLINE — SYSTEM HALTED</div>
+  <div class="off-title">OFFLINE — SYSTEM HALTED</div>
+  <div class="off-sub">RESTORE NETWORK CONNECTION TO RESUME</div>
 </div>
 
 <div id="app">
-  <header>
-    <div class="logo"><div class="gem"></div><div class="logo-t">Nox<span>Vault</span></div></div>
-    <div class="hdr-r">
-      <button class="lbtn a" id="lang-zh" onclick="switchLang('zh')">ZH</button>
-      <button class="lbtn" id="lang-en" onclick="switchLang('en')">EN</button>
-    </div>
-  </header>
+<header>
+  <div class="logo"><div class="gem"></div><div class="logo-t">Nox<span>Vault</span></div></div>
+  <div class="hdr-r">
+    <button class="lbtn a" id="lang-zh" onclick="switchLang('zh')">ZH</button>
+    <button class="lbtn"   id="lang-en" onclick="switchLang('en')">EN</button>
+  </div>
+</header>
 
-  <main>
+<main>
+  <div>
+    <div class="slbl" id="ui-lbl-mode">// 核心防護模組</div>
+  </div>
+
+  <!-- UPLOAD CONTAINER -->
+  <div class="upload-container" id="upload-container">
+    <!-- Drop state -->
+    <div id="drop-zone" onclick="triggerFileSelect()">
+      <svg class="drop-icon" viewBox="0 0 24 24">
+        <path stroke-linecap="square" stroke-width="1.5" d="M12 5v14M5 12h14"/>
+      </svg>
+      <div class="drop-txt" id="ui-drop-txt">拖放檔案至此，或點擊進行瀏覽</div>
+      <div class="drop-sub" id="ui-drop-sub">支援最大限制 100MB 任意二進位檔案</div>
+    </div>
+    <!-- File selected state -->
+    <div id="file-info-view">
+      <div class="f-header">
+        <div class="f-meta">
+          <div class="f-name" id="selected-file-name">—</div>
+          <div class="f-size" id="selected-file-size">—</div>
+        </div>
+        <button class="btn-clear" onclick="clearSelectedFile(event)" id="ui-btn-remove">移除檔案 / REMOVE</button>
+      </div>
+      <div class="sha-section">
+        <div class="sha-lbl"><span class="sha-dot"></span><span id="ui-hash-title">本地預分析 SHA-256 特徵碼</span></div>
+        <div class="sha-value computing" id="hash-string">計算中...</div>
+      </div>
+    </div>
+  </div>
+  <input type="file" id="hidden-file-input" style="display:none" onchange="handleFileSelectEvent(event)">
+
+  <!-- SCAN BUTTON -->
+  <button id="scan-btn" onclick="startSecurityPipeline()" disabled>
+    <div class="spin" id="scan-spin"></div>
+    <span id="scan-btn-t">請選擇檔案以開始掃描</span>
+  </button>
+
+  <!-- PIPELINE TRACKER -->
+  <div id="pipeline">
+    <div class="pipe-header" id="pipe-header-lbl">// 實時安全進度追蹤</div>
+    <div class="pipe-body" id="pipe-body">
+      <!-- steps injected by JS -->
+    </div>
+  </div>
+
+  <!-- ERROR DASHBOARD -->
+  <div id="err-dashboard">
+    <div class="err-top">
+      <div class="err-icon">✕</div>
+      <div>
+        <div class="err-headline" id="err-headline">系統分析管線中斷</div>
+        <div class="err-stage-tag" id="err-stage-tag">—</div>
+      </div>
+    </div>
+    <div class="err-body">
+      <div class="err-block">
+        <div class="err-block-lbl" id="lbl-err-cause">核心原因解析</div>
+        <div class="err-block-txt" id="err-why">—</div>
+      </div>
+      <div class="err-block">
+        <div class="err-block-lbl" id="lbl-err-fix">建議修復動作</div>
+        <div class="err-fixes" id="err-fixes"></div>
+      </div>
+      <div class="err-block">
+        <div class="err-block-lbl" id="lbl-err-raw">原始例外日誌</div>
+        <div class="err-raw" id="err-log">—</div>
+      </div>
+    </div>
+    <div class="err-actions">
+      <button class="ea-btn" onclick="startSecurityPipeline()" id="ea-retry">重試掃描</button>
+      <button class="ea-btn" onclick="copyErrLog()"            id="ea-copy-err">複製錯誤日誌</button>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results-dashboard">
+    <div class="slbl" id="ui-lbl-res">// 威脅檢測報告數據</div>
+
+    <!-- Danger Banner (VT malicious > 0) -->
+    <div id="danger-banner">
+      <div class="db-ico">⚠</div>
+      <div>
+        <div class="db-title" id="db-title">威脅已偵測 — 此檔案具有惡意</div>
+        <div class="db-sub"   id="db-sub"></div>
+      </div>
+    </div>
+
+    <!-- Score hero -->
+    <div class="hero-banner" id="verdict-banner">
+      <div class="score-ring" id="score-ring">
+        <div class="score-n" id="verdict-score">—</div>
+        <div class="score-u" id="score-unit">RISK</div>
+      </div>
+      <div class="verdict-info">
+        <div class="verdict-str" id="verdict-string">—</div>
+        <div class="verdict-tgt" id="verdict-target-display">—</div>
+        <div class="verdict-chips">
+          <div class="chip" id="chip-size">SIZE: <b>—</b></div>
+          <div class="chip" id="chip-time">TIME: <b>—</b></div>
+          <div class="chip" id="chip-eng">ENGINES: <b>—</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mem-ok">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="square" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span id="ui-mem-txt">檔案已從伺服器記憶體中銷毀 — 無任何資料留存</span>
+    </div>
+
+    <!-- Dual engine cards -->
     <div>
-      <div class="slbl" id="ui-lbl-mode">// 核心防護模組</div>
-    </div>
-
-    <!-- CORE RECTANGLE CONTAINER -->
-    <div class="upload-container">
-      <!-- Empty/Drop State (Yellow Circle area kept) -->
-      <div id="drop-zone" onclick="triggerFileSelect()">
-        <svg class="drop-icon" viewBox="0 0 24 24">
-          <path stroke-linecap="square" stroke-width="2" d="M12 5v14M5 12h14"/>
-        </svg>
-        <div id="ui-drop-txt" style="font-size:.8rem; font-weight:700;">拖放檔案至此，或點擊進行瀏覽</div>
-        <div id="ui-drop-sub" style="font-size:.65rem; color:var(--t3);">支援最大限制 100MB 任意二進位檔案</div>
-      </div>
-
-      <!-- Filled State (Fills entire container with strict right angles) -->
-      <div id="file-info-view">
-        <div class="f-header">
-          <div class="f-meta">
-            <div class="f-name" id="selected-file-name">---</div>
-            <div class="f-size" id="selected-file-size">---</div>
-          </div>
-          <button class="btn-clear" onclick="clearSelectedFile(event)">移除檔案 / REMOVE</button>
-        </div>
-        <div class="f-crypto-box">
-          <div class="crypto-lbl" id="ui-hash-title">本地預分析 SHA-256 特徵碼</div>
-          <div class="crypto-val" id="hash-string">Computing...</div>
-        </div>
-      </div>
-    </div>
-
-    <button id="scan-btn" onclick="startSecurityPipeline()" disabled>執行核心安全防禦掃描</button>
-
-    <!-- LIVE PIPELINE PROGRESS TRACKER -->
-    <div id="pipeline">
-      <div class="slbl">// 實時安全進度追蹤</div>
-      <div class="pipe-step wait" id="p1">
-        <div class="pipe-status-dot"></div>
-        <div class="pipe-text">
-          <div class="pipe-title" id="ui-p1-t">階段 1: 本地預分析與特徵編碼</div>
-          <div class="pipe-desc" id="ui-p1-d">等待分析目標...</div>
-        </div>
-      </div>
-      <div class="pipe-step wait" id="p2">
-        <div class="pipe-status-dot"></div>
-        <div class="pipe-text">
-          <div class="pipe-title" id="ui-p2-t">階段 2: 建立後端安全加密通道</div>
-          <div class="pipe-desc" id="ui-p2-d">驗證安全令牌並封裝表單負載。</div>
-        </div>
-      </div>
-      <div class="pipe-step wait" id="p3">
-        <div class="pipe-status-dot"></div>
-        <div class="pipe-text">
-          <div class="pipe-title" id="ui-p3-t">階段 3: 雲端沙箱與雙核心威脅檢索</div>
-          <div class="pipe-desc" id="ui-p3-d">傳輸字節流並調取安全核心情資報告。</div>
-        </div>
-      </div>
-      <div class="pipe-step wait" id="p4">
-        <div class="pipe-status-dot"></div>
-        <div class="pipe-text">
-          <div class="pipe-title" id="ui-p4-t">階段 4: 威脅判定與結構化數據合成</div>
-          <div class="pipe-desc" id="ui-p4-d">核對威脅指標，完成最後漏洞判定。</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DIAGNOSTIC ERROR DASHBOARD -->
-    <div id="err-dashboard">
-      <div class="err-header" id="ui-err-title">⚠ 系統分析管線中斷 (PIPELINE INTERRUPTED)</div>
-      <div class="err-section">
-        <div class="err-lbl">報錯階段 / Failed Phase</div>
-        <div class="err-txt" id="err-phase">---</div>
-      </div>
-      <div class="err-section">
-        <div class="err-lbl">核心原因解析 / Cause of Failure</div>
-        <div class="err-txt" id="err-why">---</div>
-      </div>
-      <div class="err-section">
-        <div class="err-lbl">建議修復動作 / Remediation Action</div>
-        <div class="err-txt" id="err-fix">---</div>
-      </div>
-      <div class="err-section">
-        <div class="err-lbl">原始例外日誌 / Raw Exception Log</div>
-        <div class="err-raw" id="err-log">---</div>
-      </div>
-    </div>
-
-    <!-- STRUCTURAL DATA RESULTS -->
-    <div id="results-dashboard">
-      <div class="slbl" id="ui-lbl-res">// 威脅檢測報告數據</div>
-      
-      <div class="hero-banner" id="verdict-banner">
-        <div class="score-circle" id="verdict-score">0</div>
-        <div class="verdict-info">
-          <div class="verdict-title" id="verdict-string">---</div>
-          <div class="verdict-target" id="verdict-target-display">Target</div>
-        </div>
-      </div>
-
+      <div class="slbl" id="lbl-engine-detail">// 雙核心引擎分析</div>
       <div class="details-grid">
         <div class="details-card">
-          <div class="card-lbl">VirusTotal Core Verdict</div>
-          <div class="card-val" id="res-vt">No data</div>
+          <div class="card-lbl">VirusTotal — 惡意引擎偵測數</div>
+          <div class="card-val" id="res-vt">—</div>
+          <div style="font-size:.6rem;color:var(--t3)" id="res-vt-sub">—</div>
         </div>
         <div class="details-card">
-          <div class="card-lbl">Hybrid Analysis Threat Score</div>
-          <div class="card-val" id="res-ha">No data</div>
+          <div class="card-lbl">Hybrid Analysis — 威脅評分</div>
+          <div class="card-val" id="res-ha">—</div>
+          <div style="font-size:.6rem;color:var(--t3)" id="res-ha-sub">—</div>
         </div>
       </div>
-
-      <button class="btn-pdf" onclick="generateHighFidelityPDF()" id="ui-btn-pdf">匯出彩色高階資安報告 (PDF)</button>
     </div>
 
-    <input type="file" id="hidden-file-input" style="display:none;" onchange="handleFileSelectEvent(event)">
-  </main>
+    <!-- SHA-256 verification -->
+    <div>
+      <div class="slbl" id="lbl-hash-verify">// 雜湊完整性驗證</div>
+      <div class="details-grid">
+        <div class="details-card">
+          <div class="card-lbl" id="lbl-local-hash">本地 SHA-256（掃描前）</div>
+          <div class="card-val" id="res-local-hash" style="font-size:.65rem;cursor:pointer" title="點擊複製">—</div>
+        </div>
+        <div class="details-card">
+          <div class="card-lbl" id="lbl-server-hash">伺服器 SHA-256</div>
+          <div class="card-val" id="res-server-hash" style="font-size:.65rem" id="res-server-hash">—</div>
+          <div class="card-val" id="res-hash-match" style="font-size:.7rem;margin-top:4px">—</div>
+        </div>
+      </div>
+    </div>
 
-  <footer>
-    <div>SYSTEM: NOXVAULT SECURE FRAMEWORK v3.2</div>
-    <div>LOGGED: CHANNEL_ACTIVE</div>
-  </footer>
-</div>
+    <!-- Engine breakdown (VT scans) -->
+    <div id="eng-section">
+      <div class="slbl" id="lbl-eng-breakdown">// 引擎偵測明細</div>
+      <div class="eng-grid" id="eng-grid"></div>
+    </div>
+
+    <!-- Threats table -->
+    <div>
+      <div class="slbl" id="lbl-threats">// 威脅指標</div>
+      <div class="tbl-wrap">
+        <table class="thr-tbl">
+          <thead><tr>
+            <th id="th-ind">指標</th><th id="th-cat">類別</th>
+            <th id="th-sev">嚴重程度</th><th id="th-det">詳細資訊</th>
+          </tr></thead>
+          <tbody id="thr-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="act-row">
+      <button class="act-btn" onclick="generatePDF()" id="ui-btn-pdf">
+        <svg viewBox="0 0 24 24"><path stroke-linecap="square" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span id="ui-btn-pdf-t">匯出資安報告 PDF</span>
+      </button>
+      <button class="act-btn" onclick="copyRaw()" id="ui-btn-json">
+        <svg viewBox="0 0 24 24"><path stroke-linecap="square" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+        <span id="ui-btn-json-t">複製原始 JSON</span>
+      </button>
+      <button class="act-btn" onclick="clearAll()" id="ui-btn-new">
+        <svg viewBox="0 0 24 24"><path stroke-linecap="square" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span id="ui-btn-new-t">新增掃描</span>
+      </button>
+    </div>
+  </div><!-- /results -->
+
+</main>
+<footer>
+  <div>NOXVAULT SECURE FRAMEWORK v4.0</div>
+  <div id="f-clock">—</div>
+</footer>
+</div><!-- /app -->
 
 <script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════
+//  NoxVault v4.0
+//  Frontend — File Scanner with full pipeline diagnostics
+//  API: POST multipart/form-data  →  X-Client-Secret header
+//  Reads: data.reports.virustotal.malicious
+//         data.reports.hybrid_analysis.threat_score
+// ═══════════════════════════════════════════════════════════════
+
 const API_ENDPOINT = "https://oliver2013tw-noxvault-api.hf.space/scan";
-const AUTH_SECRET = "NoxVault_Secret_Key_Access_NVK-TOP-00001";
-const MAX_FILE_SIZE = 100 * 1024 * 1024;
+const AUTH_SECRET  = "NoxVault_Secret_Key_Access_NVK-TOP-00001";
+const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 
-let currentLang = "zh";
-let selectedFile = null;
-let isScanning = false;
-let latestScanResults = null;
-let currentFileHash = "";
+// ── App state ──────────────────────────────────────────────────
+let currentLang      = "zh";
+let selectedFile     = null;
+let isScanning       = false;
+let latestScanData   = null;   // raw JSON from API
+let currentFileHash  = "";
+let scanStartTime    = null;
 
+// ── i18n ───────────────────────────────────────────────────────
 const i18n = {
   zh: {
     lblMode: "// 核心防護模組",
     dropTxt: "拖放檔案至此，或點擊進行瀏覽",
     dropSub: "支援最大限制 100MB 任意二進位檔案",
-    btnScan: "執行核心安全防禦掃描",
-    btnScanning: "安全掃描執行中. 請勿關閉網頁...",
-    lblRes: "// 威脅檢測報告數據",
-    btnPdf: "匯出彩色高階資安報告 (PDF)",
-    errTitle: "⚠ 系統分析管線中斷 (PIPELINE INTERRUPTED)",
+    btnIdle: "請選擇檔案以開始掃描",
+    btnReady: "執行核心安全防禦掃描",
+    btnBusy: "安全掃描執行中，請勿關閉網頁...",
+    btnRemove: "移除檔案 / REMOVE",
     hashTitle: "本地預分析 SHA-256 特徵碼",
-    p1t: "階段 1: 本地預分析與特徵編碼",
-    p2t: "階段 2: 建立後端安全加密通道",
-    p3t: "階段 3: 雲端沙箱與雙核心威脅檢索",
-    p4t: "階段 4: 威脅判定與結構化數據合成",
-    warnScan: "Warning: Leaving this page will terminate the current scan operation.",
-    safe: "未發現明確惡意特徵 (CLEAN / SAFE)",
-    danger: "偵測到高度惡意威脅危險 (MALICIOUS THREAT DETECTED)",
-    noEngine: "未找到引擎分析數據 (No engine data found)"
+    hashComputing: "計算中...",
+    hashError: "計算失敗",
+    pipeHeader: "// 實時安全進度追蹤",
+    lblRes: "// 威脅檢測報告數據",
+    errHeadline: "系統分析管線中斷",
+    lbl_err_cause: "核心原因解析",
+    lbl_err_fix: "建議修復動作",
+    lbl_err_raw: "原始例外日誌",
+    ea_retry: "重試掃描",
+    ea_copy_err: "複製錯誤日誌",
+    th_ind: "指標", th_cat: "類別", th_sev: "嚴重程度", th_det: "詳細資訊",
+    lbl_eng: "// 雙核心引擎分析",
+    lbl_eng_bd: "// 引擎偵測明細",
+    lbl_threats: "// 威脅指標",
+    lbl_hash_v: "// 雜湊完整性驗證",
+    lbl_local_hash: "本地 SHA-256（掃描前）",
+    lbl_server_hash: "伺服器 SHA-256",
+    lbl_score_unit: "RISK",
+    mem_txt: "檔案已從伺服器記憶體中銷毀 — 無任何資料留存",
+    db_title: "威脅已偵測 — 此檔案具有惡意",
+    verdict_clean: "未發現明確惡意特徵 (CLEAN)",
+    verdict_sus:   "可疑目標 (SUSPICIOUS)",
+    verdict_danger:"偵測到高度惡意威脅 (MALICIOUS)",
+    verdict_nodata:"無引擎資料 (NO ENGINE DATA)",
+    no_threat: "未偵測到威脅指標",
+    no_eng_detail: "引擎未回傳明細資料",
+    hash_match:    "✓ 雜湊相符 — 傳輸完整性驗證通過",
+    hash_mismatch: "⚠ 雜湊不符 — 請注意檔案可能被修改",
+    btn_pdf: "匯出資安報告 PDF",
+    btn_json: "複製原始 JSON",
+    btn_new: "新增掃描",
+    warnScan: "警告：離開此頁面將終止目前的掃描作業。",
+    size: "大小：", time: "耗時：", engines: "引擎：",
   },
   en: {
     lblMode: "// CORE SECURITY MODULE",
     dropTxt: "Drag & drop file here, or click to browse",
     dropSub: "Supports any binary file up to 100MB",
-    btnScan: "Execute Core Security Scan",
-    btnScanning: "Security Scan In Progress. Do not leave...",
-    lblRes: "// SECURITY DETECTION REPORT",
-    btnPdf: "Export Color Security Report (PDF)",
-    errTitle: "⚠ PIPELINE INTERRUPTED",
+    btnIdle: "Select a file to begin scan",
+    btnReady: "Execute Core Security Scan",
+    btnBusy: "Scan in progress. Do not leave...",
+    btnRemove: "REMOVE FILE",
     hashTitle: "Local Pre-Scan SHA-256 Signature",
-    p1t: "Phase 1: Local Pre-Analysis & Signature Compilation",
-    p2t: "Phase 2: Establishing Upstream Secure Channel",
-    p3t: "Phase 3: Cloud Sandbox Intelligence Retrieval",
-    p4t: "Phase 4: Threat Matrix Synthesis & Parsing",
+    hashComputing: "Computing...",
+    hashError: "Computation failed",
+    pipeHeader: "// LIVE PIPELINE TRACKER",
+    lblRes: "// THREAT DETECTION REPORT",
+    errHeadline: "PIPELINE INTERRUPTED",
+    lbl_err_cause: "Root Cause Analysis",
+    lbl_err_fix: "Recommended Fixes",
+    lbl_err_raw: "Raw Exception Log",
+    ea_retry: "Retry Scan",
+    ea_copy_err: "Copy Error Log",
+    th_ind: "Indicator", th_cat: "Category", th_sev: "Severity", th_det: "Detail",
+    lbl_eng: "// DUAL-ENGINE ANALYSIS",
+    lbl_eng_bd: "// ENGINE BREAKDOWN",
+    lbl_threats: "// THREAT INDICATORS",
+    lbl_hash_v: "// HASH INTEGRITY VERIFICATION",
+    lbl_local_hash: "Local SHA-256 (Pre-Scan)",
+    lbl_server_hash: "Server SHA-256",
+    lbl_score_unit: "RISK",
+    mem_txt: "FILE PURGED FROM SERVER MEMORY — NO DATA RETAINED",
+    db_title: "THREAT DETECTED — FILE IS MALICIOUS",
+    verdict_clean: "NO COMPROMISE FOUND (CLEAN)",
+    verdict_sus:   "SUSPICIOUS TARGET",
+    verdict_danger:"MALICIOUS THREAT DETECTED",
+    verdict_nodata:"NO ENGINE DATA",
+    no_threat: "No threat indicators detected",
+    no_eng_detail: "No engine detail data available",
+    hash_match:    "✓ Hash match — transmission integrity verified",
+    hash_mismatch: "⚠ Hash mismatch — file may have been modified",
+    btn_pdf: "Export Security Report PDF",
+    btn_json: "Copy Raw JSON",
+    btn_new: "New Scan",
     warnScan: "Warning: Leaving this page will terminate the current scan operation.",
-    safe: "NO COMPROMISE FOUND (CLEAN / SAFE)",
-    danger: "MALICIOUS THREAT DETECTED",
-    noEngine: "No engine data found"
+    size: "SIZE: ", time: "TIME: ", engines: "ENGINES: ",
   }
 };
 
-window.addEventListener('DOMContentLoaded', () => {
-  setupDragAndDrop();
-  initPWA();
-});
+const t  = k => (i18n[currentLang][k] || i18n.en[k] || k);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
+// ── Pipeline step definitions ──────────────────────────────────
+const PIPE_STEPS = [
+  { id:'p1', zh:'階段 1 — 本地預分析與特徵編碼',   en:'Phase 1 — Local Pre-Analysis & Signature Compilation' },
+  { id:'p2', zh:'階段 2 — 建立後端安全通道',        en:'Phase 2 — Establishing Upstream Secure Channel' },
+  { id:'p3', zh:'階段 3 — 雲端沙箱雙核心威脅檢索',  en:'Phase 3 — Cloud Sandbox Dual-Engine Intelligence' },
+  { id:'p4', zh:'階段 4 — 威脅判定與結構化數據合成', en:'Phase 4 — Threat Matrix Synthesis & Parsing' },
+];
+
+// ── Language switch ────────────────────────────────────────────
 function switchLang(lang) {
   currentLang = lang;
   document.getElementById('lang-zh').classList.toggle('a', lang === 'zh');
   document.getElementById('lang-en').classList.toggle('a', lang === 'en');
-  
-  const t = i18n[lang];
-  document.getElementById('ui-lbl-mode').innerText = t.lblMode;
-  document.getElementById('ui-drop-txt').innerText = t.dropTxt;
-  document.getElementById('ui-drop-sub').innerText = t.dropSub;
-  document.getElementById('scan-btn').innerText = isScanning ? t.btnScanning : t.btnScan;
-  document.getElementById('ui-lbl-res').innerText = t.lblRes;
-  document.getElementById('ui-btn-pdf').innerText = t.btnPdf;
-  document.getElementById('ui-err-title').innerText = t.errTitle;
-  document.getElementById('ui-hash-title').innerText = t.hashTitle;
-  document.getElementById('ui-p1-t').innerText = t.p1t;
-  document.getElementById('ui-p2-t').innerText = t.p2t;
-  document.getElementById('ui-p3-t').innerText = t.p3t;
-  document.getElementById('ui-p4-t').innerText = t.p4t;
+  applyI18n();
+  if(latestScanData) renderResults(latestScanData);
 }
 
+function applyI18n() {
+  const set = (id, key) => { const el = document.getElementById(id); if(el) el.textContent = t(key); };
+  set('ui-lbl-mode','lblMode'); set('ui-drop-txt','dropTxt'); set('ui-drop-sub','dropSub');
+  set('ui-hash-title','hashTitle'); set('pipe-header-lbl','pipeHeader');
+  set('ui-lbl-res','lblRes'); set('err-headline','errHeadline');
+  set('lbl-err-cause','lbl_err_cause'); set('lbl-err-fix','lbl_err_fix'); set('lbl-err-raw','lbl_err_raw');
+  set('ea-retry','ea_retry'); set('ea-copy-err','ea_copy_err');
+  set('th-ind','th_ind'); set('th-cat','th_cat'); set('th-sev','th_sev'); set('th-det','th_det');
+  set('lbl-engine-detail','lbl_eng'); set('lbl-eng-breakdown','lbl_eng_bd');
+  set('lbl-threats','lbl_threats'); set('lbl-hash-verify','lbl_hash_v');
+  set('lbl-local-hash','lbl_local_hash'); set('lbl-server-hash','lbl_server_hash');
+  set('score-unit','lbl_score_unit'); set('ui-mem-txt','mem_txt');
+  set('db-title','db_title'); set('ui-btn-remove','btnRemove');
+  set('ui-btn-pdf-t','btn_pdf'); set('ui-btn-json-t','btn_json'); set('ui-btn-new-t','btn_new');
+  updateBtnLabel();
+  renderPipeStepLabels();
+}
+
+function updateBtnLabel() {
+  const el = document.getElementById('scan-btn-t');
+  if(!el) return;
+  if(isScanning)       el.textContent = t('btnBusy');
+  else if(selectedFile) el.textContent = t('btnReady');
+  else                  el.textContent = t('btnIdle');
+}
+
+// ── Clock ──────────────────────────────────────────────────────
+setInterval(() => {
+  const el = document.getElementById('f-clock');
+  if(el) el.textContent = new Date().toISOString().replace('T',' ').slice(0,19)+' UTC';
+}, 1000);
+
+// ── Offline ────────────────────────────────────────────────────
+function updateOffline() {
+  document.getElementById('offline').classList.toggle('on', !navigator.onLine);
+}
+window.addEventListener('online',  updateOffline);
+window.addEventListener('offline', updateOffline);
+updateOffline();
+
+// ── File handling ──────────────────────────────────────────────
 function triggerFileSelect() {
-  if (isScanning) return;
-  document.getElementById('hidden-file-input').click();
+  if(!isScanning) document.getElementById('hidden-file-input').click();
 }
-
 function handleFileSelectEvent(e) {
-  const file = e.target.files[0];
-  if (file) processSelectedFile(file);
+  if(e.target.files[0]) processSelectedFile(e.target.files[0]);
+}
+function formatBytes(b) {
+  if(b < 1024) return b+' B';
+  if(b < 1048576) return (b/1024).toFixed(1)+' KB';
+  return (b/1048576).toFixed(2)+' MB';
 }
 
 function processSelectedFile(file) {
-  if (file.size > MAX_FILE_SIZE) {
-    alert("Error: File exceeds maximum 100MB limit.");
+  if(file.size > MAX_FILE_SIZE) {
+    showPipelineError('p1', '階段 1 — 本地預分析',
+      currentLang==='zh'?'檔案超過 100MB 限制':'File exceeds 100MB limit',
+      currentLang==='zh'?'檔案大小超出後端 API 允許的上限（100MB）。':'File size exceeds the 100MB limit enforced by the backend API.',
+      [currentLang==='zh'?'選擇小於 100MB 的檔案':'Select a file smaller than 100MB'],
+      '');
     return;
   }
   selectedFile = file;
-  
-  // Toggle Views to fill the entire container beautifully
+  currentFileHash = "";
+  latestScanData  = null;
+
+  // Show file info view
   document.getElementById('drop-zone').style.display = 'none';
   document.getElementById('file-info-view').style.display = 'flex';
-  
-  document.getElementById('selected-file-name').innerText = file.name;
-  document.getElementById('selected-file-size').innerText = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
-  
-  resetPipelineUI();
+  document.getElementById('upload-container').classList.add('has-file');
+  document.getElementById('selected-file-name').textContent = file.name;
+  document.getElementById('selected-file-size').textContent = formatBytes(file.size);
+
+  resetDashboards();
   document.getElementById('scan-btn').disabled = false;
-  
-  triggerLocalHashCalculation(file);
+  updateBtnLabel();
+
+  // Compute SHA-256 immediately
+  const hashEl = document.getElementById('hash-string');
+  hashEl.textContent = t('hashComputing');
+  hashEl.className   = 'sha-value computing';
+  computeSHA256(file).then(hash => {
+    currentFileHash  = hash;
+    hashEl.textContent = hash;
+    hashEl.className   = 'sha-value';
+  }).catch(() => {
+    hashEl.textContent = t('hashError');
+    hashEl.className   = 'sha-value error';
+  });
 }
 
 function clearSelectedFile(e) {
   e.stopPropagation();
-  if (isScanning) return;
-  
-  selectedFile = null;
+  if(isScanning) return;
+  clearAll();
+}
+
+function clearAll() {
+  selectedFile    = null;
   currentFileHash = "";
-  document.getElementById('hidden-file-input').value = "";
-  
+  latestScanData  = null;
+  document.getElementById('hidden-file-input').value = '';
   document.getElementById('file-info-view').style.display = 'none';
   document.getElementById('drop-zone').style.display = 'flex';
-  
+  document.getElementById('upload-container').classList.remove('has-file');
   document.getElementById('scan-btn').disabled = true;
-  resetPipelineUI();
+  resetDashboards();
+  updateBtnLabel();
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function setupDragAndDrop() {
-  const zone = document.getElementById('drop-zone');
-  window.addEventListener('dragover', e => e.preventDefault());
-  window.addEventListener('drop', e => e.preventDefault());
-  
-  zone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    if (!isScanning) zone.classList.add('drag');
-  });
-  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
-  zone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    zone.classList.remove('drag');
-    if (isScanning) return;
-    const file = e.dataTransfer.files[0];
-    if (file) processSelectedFile(file);
-  });
-}
-
-async function triggerLocalHashCalculation(file) {
-  try {
-    document.getElementById('hash-string').innerText = "Calculating cryptographic signature...";
-    const buffer = await file.arrayBuffer();
-    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    currentFileHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    document.getElementById('hash-string').innerText = currentFileHash;
-    return currentFileHash;
-  } catch (err) {
-    document.getElementById('hash-string').innerText = "[Failed to compute signature]";
-    return "";
-  }
-}
-
-const exitInterceptor = (e) => {
-  e.preventDefault();
-  e.returnValue = i18n[currentLang].warnScan;
-  return i18n[currentLang].warnScan;
-};
-
-function updatePipelineStep(stepId, status, descText = null) {
-  const el = document.getElementById(stepId);
-  if (!el) return;
-  el.className = `pipe-step ${status}`;
-  if (descText) el.querySelector('.pipe-desc').innerText = descText;
-}
-
-function resetPipelineUI() {
+function resetDashboards() {
   document.getElementById('pipeline').classList.remove('v');
   document.getElementById('err-dashboard').classList.remove('v');
   document.getElementById('results-dashboard').classList.remove('v');
-  updatePipelineStep('p1', 'wait', '...');
-  updatePipelineStep('p2', 'wait', '...');
-  updatePipelineStep('p3', 'wait', '...');
-  updatePipelineStep('p4', 'wait', '...');
+  document.getElementById('danger-banner').classList.remove('v');
 }
 
-function triggerPipelinePanic(phaseId, phaseName, rawError) {
-  window.removeEventListener('beforeunload', exitInterceptor);
-  isScanning = false;
-  document.getElementById('scan-btn').disabled = false;
-  document.getElementById('scan-btn').innerText = i18n[currentLang].btnScan;
-  updatePipelineStep(phaseId, 'err', "Execution Aborted.");
-  
-  document.getElementById('err-phase').innerText = `${phaseId.toUpperCase()} - ${phaseName}`;
-  document.getElementById('err-log').innerText = String(rawError.stack || rawError.message || rawError);
-  
-  let whyMsg = ""; let fixMsg = "";
-  if (phaseId === 'p1') {
-    whyMsg = "前端環境讀取檔案失敗或核心特徵編碼異常。";
-    fixMsg = "請檢查檔案是否被其他程式佔用，重新選取檔案試試。";
-  } else if (phaseId === 'p2') {
-    whyMsg = "表單負載包裝失敗或本地環境變數遺失。";
-    fixMsg = "請刷新頁面並重新上傳。";
-  } else if (phaseId === 'p3') {
-    whyMsg = "伺服器拒絕連線 (403)、拒絕解析資料 (400) 或後端沙箱超時 (504)。";
-    fixMsg = "請確保 X-Client-Secret 未經竄改，或可能因 API 配額滿載，請於數分鐘後重新嘗試。";
-  } else if (phaseId === 'p4') {
-    whyMsg = "成功接收資料，但無法從 data.reports.virustotal / hybrid_analysis 提取合法欄位。";
-    fixMsg = "後端資料結構可能有重大更新，請通知資安團隊修正映射路由。";
-  }
-  document.getElementById('err-why').innerText = whyMsg;
-  document.getElementById('err-fix').innerText = fixMsg;
+// ── Drag & Drop ────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const zone = document.getElementById('drop-zone');
+  window.addEventListener('dragover', e => e.preventDefault());
+  window.addEventListener('drop', e => e.preventDefault());
+  zone.addEventListener('dragover', e => { e.preventDefault(); if(!isScanning) zone.classList.add('drag'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('drag');
+    if(!isScanning && e.dataTransfer.files[0]) processSelectedFile(e.dataTransfer.files[0]);
+  });
+  applyI18n();
+});
+
+// ── SHA-256 ────────────────────────────────────────────────────
+async function computeSHA256(file) {
+  const buf = await file.arrayBuffer();
+  const hb  = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hb)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── Pipeline rendering ─────────────────────────────────────────
+let pipeState = {};   // { p1: {status, desc, elapsed}, ... }
+
+function renderPipeStepLabels() {
+  const body = document.getElementById('pipe-body');
+  body.innerHTML = PIPE_STEPS.map((s, i) => {
+    const isLast = i === PIPE_STEPS.length - 1;
+    const st  = pipeState[s.id] || { status:'wait', desc:'', elapsed:null };
+    const lbl = currentLang === 'zh' ? s.zh : s.en;
+    return `
+      <div class="pipe-step ${st.status}" id="${s.id}">
+        <div class="pipe-left">
+          <div class="pipe-node ${st.status}"></div>
+          ${!isLast ? '<div class="pipe-vline"></div>' : ''}
+        </div>
+        <div class="pipe-content">
+          <div class="pipe-title">${esc(lbl)}</div>
+          ${st.desc ? `<div class="pipe-desc">${esc(st.desc)}</div>` : ''}
+          ${st.elapsed !== null ? `<div class="pipe-elapsed">+${(st.elapsed/1000).toFixed(2)}s</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function initPipeline() {
+  pipeState = {};
+  PIPE_STEPS.forEach(s => { pipeState[s.id] = { status:'wait', desc:'', elapsed:null }; });
+  renderPipeStepLabels();
+  document.getElementById('pipeline').classList.add('v');
+}
+
+function setPipe(id, status, desc='', elapsed=null) {
+  pipeState[id] = { status, desc, elapsed };
+  renderPipeStepLabels();
+}
+
+// ── Structured error display ───────────────────────────────────
+/*
+  showPipelineError builds a rich diagnostic panel:
+    stageId   — pipeline stage id (p1/p2/p3/p4)
+    stageName — display name
+    what      — one-line error
+    why       — explanation (zh/en aware)
+    fixes     — string[]
+    raw       — raw exception text
+*/
+function showPipelineError(stageId, stageName, what, why, fixes, raw) {
+  setPipe(stageId, 'err', what, Date.now()-scanStart);
+
+  document.getElementById('err-headline').textContent = t('errHeadline');
+  document.getElementById('err-stage-tag').textContent =
+    (currentLang==='zh' ? '報錯階段：' : 'Failed Phase: ') + stageName;
+  document.getElementById('err-why').textContent  = why;
+  document.getElementById('err-log').textContent  = raw || '—';
+
+  const fixContainer = document.getElementById('err-fixes');
+  fixContainer.innerHTML = fixes.map(f => `<div class="err-fix">${esc(f)}</div>`).join('');
+
   document.getElementById('err-dashboard').classList.add('v');
 }
 
-async function startSecurityPipeline() {
-  if (isScanning || !selectedFile) return;
-  
-  isScanning = true;
-  resetPipelineUI();
-  document.getElementById('pipeline').classList.add('v');
-  document.getElementById('scan-btn').disabled = true;
-  document.getElementById('scan-btn').innerText = i18n[currentLang].btnScanning;
-  window.addEventListener('beforeunload', exitInterceptor);
-  
-  const payloadData = new FormData();
-  
-  // PHASE 1
-  updatePipelineStep('p1', 'run', '檢查檔案狀態並核對雜湊常規性...');
-  try {
-    if(!currentFileHash) {
-      await triggerLocalHashCalculation(selectedFile);
-    }
-    updatePipelineStep('p1', 'ok', `指紋特徵完成: ${currentFileHash.substring(0,16)}...`);
-  } catch (err) {
-    triggerPipelinePanic('p1', '本地預分析與特徵編碼', err); return;
-  }
-  
-  // PHASE 2
-  updatePipelineStep('p2', 'run', '包裝 FormData 並核對核心加密認證標頭...');
-  try {
-    payloadData.append('file', selectedFile);
-    // Boundary setting is fully delegated to the browser. Content-Type header avoided manually.
-    updatePipelineStep('p2', 'ok', "安全加密標頭就緒，安全連線通道已開啟。");
-  } catch (err) {
-    triggerPipelinePanic('p2', '建立後端安全加密通道', err); return;
-  }
-  
-  // PHASE 3
-  updatePipelineStep('p3', 'run', '正在傳輸二進位檔案流至遠端分析沙箱...');
-  let response = null;
-  try {
-    response = await fetch(API_ENDPOINT, {
-      method: "POST",
-      headers: { "X-Client-Secret": AUTH_SECRET },
-      body: payloadData
-    });
-    if (!response.ok) {
-      throw new Error(`Server integration failed. HTTP Status: ${response.status}`);
-    }
-    updatePipelineStep('p3', 'ok', "傳輸完畢，順利接獲雲端引擎原生響應。");
-  } catch (err) {
-    triggerPipelinePanic('p3', '雲端沙箱與雙核心威脅檢索', err); return;
-  }
-  
-  // PHASE 4
-  updatePipelineStep('p4', 'run', '執行 await response.json() 以同步威脅判定結果...');
-  try {
-    const rawData = await response.json();
-    latestScanResults = rawData;
-    
-    const vtReport = rawData?.reports?.virustotal;
-    const haReport = rawData?.reports?.hybrid_analysis;
-    
-    let vtMalicious = 0;
-    let haThreatScore = 0;
-    let hasEngineData = false;
-    
-    if (vtReport && typeof vtReport.malicious !== 'undefined') {
-      vtMalicious = parseInt(vtReport.malicious) || 0;
-      hasEngineData = true;
-    }
-    if (haReport && typeof haReport.threat_score !== 'undefined') {
-      haThreatScore = parseInt(haReport.threat_score) || 0;
-      hasEngineData = true;
-    }
-    
-    updatePipelineStep('p4', 'ok', "分析完整結束，正在投射視覺化安全數據。");
-    window.removeEventListener('beforeunload', exitInterceptor);
-    isScanning = false;
-    document.getElementById('scan-btn').disabled = false;
-    document.getElementById('scan-btn').innerText = i18n[currentLang].btnScan;
-    
-    renderStructuralResults(hasEngineData, vtMalicious, haThreatScore);
-  } catch (err) {
-    triggerPipelinePanic('p4', '威脅判定與結構化數據合成', err); return;
-  }
+function copyErrLog() {
+  const txt = document.getElementById('err-log').textContent;
+  navigator.clipboard.writeText(txt).catch(() => {});
 }
 
-function renderStructuralResults(hasEngineData, vtMalicious, haThreatScore) {
-  const banner = document.getElementById('verdict-banner');
-  const scoreDisplay = document.getElementById('verdict-score');
-  const verdictString = document.getElementById('verdict-string');
-  const targetDisplay = document.getElementById('verdict-target-display');
-  
-  const cardVt = document.getElementById('res-vt');
-  const cardHa = document.getElementById('res-ha');
-  
-  targetDisplay.innerText = selectedFile ? selectedFile.name : "Unknown Target";
-  
-  if (!hasEngineData) {
-    banner.className = "hero-banner safe";
-    scoreDisplay.innerText = "N/D";
-    verdictString.innerText = i18n[currentLang].noEngine;
-    cardVt.innerText = "No engine data found"; cardVt.className = "card-val";
-    cardHa.innerText = "No engine data found"; cardHa.className = "card-val";
-    document.getElementById('results-dashboard').classList.add('v');
+// ── Leave warning ──────────────────────────────────────────────
+const exitInterceptor = e => { e.preventDefault(); e.returnValue = t('warnScan'); return t('warnScan'); };
+
+// ─────────────────────────────────────────────────────────────
+//  SCAN PIPELINE
+//  BUG FIXES APPLIED:
+//  #1  html overflow-y:auto → scroll always available
+//  #2  await response.json() before renderResults — no race
+//  #3  reads data.reports.virustotal.malicious (exact path)
+//  #4  NO manual Content-Type on FormData
+//  #5  X-Client-Secret on every fetch
+//  #6  SW: POST → e.respondWith(fetch(e.request)), no bare return
+// ─────────────────────────────────────────────────────────────
+let scanStart = null;
+
+async function startSecurityPipeline() {
+  if(isScanning || !selectedFile) return;
+
+  // Pre-check: network
+  if(!navigator.onLine) {
+    showPipelineError('p1','階段 1 — 本地預分析',
+      currentLang==='zh'?'裝置目前離線':'Device is offline',
+      currentLang==='zh'
+        ? '瀏覽器報告網路中斷。NoxVault 需要網路連線才能連接至後端掃描引擎（Hugging Face Space）。'
+        : 'Browser reports no network. NoxVault needs connectivity to reach the backend engine (Hugging Face Space).',
+      currentLang==='zh'
+        ? ['確認 Wi-Fi 或有線網路已連線','關閉 VPN 後重試','確認 Hugging Face Space 可正常訪問']
+        : ['Check Wi-Fi or Ethernet is connected','Disable VPN and retry','Verify Hugging Face Space is reachable'],
+      'navigator.onLine = false');
     return;
   }
-  
-  cardVt.innerText = `${vtMalicious} Malicious Engines Flagged`;
-  cardVt.className = vtMalicious > 0 ? "card-val danger" : "card-val safe";
-  
-  cardHa.innerText = `Threat Score: ${haThreatScore} / 100`;
-  cardHa.className = haThreatScore > 75 ? "card-val danger" : "card-val safe";
-  
-  // Threat Judgment Line
-  if (vtMalicious > 0 || haThreatScore > 75) {
-    banner.className = "hero-banner danger";
-    scoreDisplay.innerText = Math.max(vtMalicious, Math.ceil(haThreatScore / 10)).toString();
-    verdictString.innerText = i18n[currentLang].danger;
-  } else {
-    banner.className = "hero-banner safe";
-    scoreDisplay.innerText = "0";
-    verdictString.innerText = i18n[currentLang].safe;
-  }
-  
-  document.getElementById('results-dashboard').classList.add('v');
-  document.getElementById('results-dashboard').scrollIntoView({ behavior: 'smooth' });
-}
 
-// RICH SECURITY PDF EXPORT GENERATION ENGINE
-function generateHighFidelityPDF() {
-  if (!latestScanResults) return;
-  
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  
-  const vt = latestScanResults?.reports?.virustotal;
-  const ha = latestScanResults?.reports?.hybrid_analysis;
-  const isMalicious = (vt?.malicious > 0 || ha?.threat_score > 75);
-  
-  // Page 1 Decorative Dark Top Header Block
-  doc.setFillColor(10, 10, 10);
-  doc.rect(0, 0, 210, 42, "F");
-  
-  // Title Text Injection
-  doc.setTextColor(0, 255, 136); // Neon Green
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(24);
-  doc.text("NOXVAULT SECURITY INTEGRITY REPORT", 14, 18);
-  
-  doc.setTextColor(150, 150, 150);
-  doc.setFontSize(8);
-  doc.setFont("Helvetica", "normal");
-  doc.text(`DIAGNOSTIC ID: NV-${Date.now()} | COMPLIANCE: ISO/IEC 27001 RECOGNITION`, 14, 28);
-  doc.text(`TIMESTAMP (UTC): ${new Date().toISOString()} | SECURE PIPELINE CHANNEL ACTIVE`, 14, 33);
-  
-  // Section Line
-  doc.setDrawColor(30, 30, 30);
-  doc.line(14, 50, 196, 50);
-  
-  // Target Identity Meta Box
-  doc.setTextColor(230, 230, 230);
-  doc.setFontSize(11);
-  doc.setFont("Helvetica", "bold");
-  doc.text("1. TARGET FILE METADATA SUMMARY", 14, 58);
-  
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(140, 140, 140);
-  
-  doc.text("File Name:", 16, 66);
-  doc.setTextColor(255, 255, 255);
-  doc.text(String(selectedFile ? selectedFile.name : "Unknown"), 42, 66);
-  
-  doc.setTextColor(140, 140, 140);
-  doc.text("File Size:", 16, 72);
-  doc.setTextColor(255, 255, 255);
-  doc.text(String(selectedFile ? `${(selectedFile.size/1024/1024).toFixed(4)} MB` : "N/A"), 42, 72);
-  
-  doc.setTextColor(140, 140, 140);
-  doc.text("SHA-256 Hash:", 16, 78);
-  doc.setTextColor(0, 255, 136);
-  doc.setFont("Courier", "bold");
-  doc.text(String(currentFileHash || "N/A"), 42, 78);
-  
-  doc.setFont("Helvetica", "normal");
-  
-  // CRISIS IMPACT VERDICT BLOCK (Preserves High Contrast Colors)
-  if (isMalicious) {
-    doc.setFillColor(255, 34, 34); // Brilliant Crimson Alert Red
-    doc.rect(14, 86, 182, 20, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("Helvetica", "bold");
-    doc.setFontSize(13);
-    doc.text("SYSTEM VERDICT: MALICIOUS ACTIVE THREAT VECTOR DETECTED", 20, 98);
-  } else {
-    doc.setFillColor(0, 204, 102); // Clean Emerald Green
-    doc.rect(14, 86, 182, 20, "F");
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("Helvetica", "bold");
-    doc.setFontSize(13);
-    doc.text("SYSTEM VERDICT: NO COMPROMISE IDENTIFIED (CLEAN / SAFE)", 20, 98);
-  }
-  
-  // DUAL ENGINE TELEMETRY DATA MATRIX (Rich Layout Representation)
-  doc.setTextColor(230, 230, 230);
-  doc.setFontSize(11);
-  doc.setFont("Helvetica", "bold");
-  doc.text("2. DUAL-ENGINE THREAT TELEMETRY DETAILED BREAKDOWN", 14, 120);
-  
-  // Draw Structure Grid
-  doc.setFillColor(12, 12, 12);
-  doc.setDrawColor(40, 40, 40);
-  
-  // VT Table Block
-  doc.rect(14, 126, 88, 48, "F");
-  doc.rect(14, 126, 88, 48, "D");
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(160, 160, 160);
-  doc.text("CORE ENGINE A: VIRUSTOTAL", 18, 133);
-  
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(8.5);
-  doc.text("Status:", 18, 142);
-  if (vt && typeof vt.malicious !== 'undefined') {
-    const isVtBad = parseInt(vt.malicious) > 0;
-    doc.setTextColor(isVtBad ? 255 : 0, isVtBad ? 34 : 255, isVtBad ? 34 : 136);
-    doc.setFont("Helvetica", "bold");
-    doc.text(isVtBad ? "MALICIOUS / RISK" : "CLEAN", 36, 142);
-    doc.setFont("Helvetica", "normal");
-    doc.setTextColor(160, 160, 160);
-    doc.text("Flagged Engines:", 18, 148);
-    doc.text(`${vt.malicious} of 70+ vendors`, 46, 148);
-    doc.text("Scan Catalog:", 18, 154);
-    doc.text("Heuristics, Signatures, ELF/PE Check", 40, 154);
-    doc.text("Database Update:", 18, 160);
-    doc.text("Real-Time Synchronized", 46, 160);
-  } else {
-    doc.text("No Engine Telemetry Received", 36, 142);
-  }
-  
-  // HA Table Block
-  doc.setFillColor(12, 12, 12);
-  doc.rect(108, 126, 88, 48, "F");
-  doc.rect(108, 126, 88, 48, "D");
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(160, 160, 160);
-  doc.text("CORE ENGINE B: HYBRID ANALYSIS", 112, 133);
-  
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(8.5);
-  doc.text("Status:", 112, 142);
-  if (ha && typeof ha.threat_score !== 'undefined') {
-    const scoreNum = parseInt(ha.threat_score) || 0;
-    const isHaBad = scoreNum > 75;
-    doc.setTextColor(isHaBad ? 255 : 0, isHaBad ? 34 : 255, isHaBad ? 34 : 136);
-    doc.setFont("Helvetica", "bold");
-    doc.text(isHaBad ? "HIGH RISK FACTOR" : "LOW RISK FACTOR", 130, 142);
-    doc.setFont("Helvetica", "normal");
-    doc.setTextColor(160, 160, 160);
-    doc.text("Risk Score:", 112, 148);
-    doc.text(`${scoreNum} / 100`, 130, 148);
-    doc.text("Sandbox Profile:", 112, 154);
-    doc.text("Kernel Traps, API Inspection", 138, 154);
-    doc.text("Threat Matrix:", 112, 160);
-    doc.text("Falcon Sandbox Integrated", 134, 160);
-  } else {
-    doc.text("No Sandbox Telemetry Received", 130, 142);
-  }
-  
-  // INCIDENT RESPONSE & ARCHITECTURAL MITIGATION GUIDELINES (Enriches PDF richness)
-  doc.setTextColor(230, 230, 230);
-  doc.setFontSize(11);
-  doc.setFont("Helvetica", "bold");
-  doc.text("3. SECURITY MITIGATION & INCIDENT HANDLING PLAYBOOK", 14, 190);
-  
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(150, 150, 150);
-  
-  if (isMalicious) {
-    doc.setTextColor(255, 85, 85);
-    doc.text("• [IMMEDIATE ISOLATION] Disconnect the host system from corporate network architectures instantly.", 14, 198);
-    doc.text("• [QUARANTINE PROCESS] Purge the file from shared drives, backup pools, and temporary directory registers.", 14, 204);
-    doc.text("• [FORENSIC ENGAGEMENT] Submit the signature to your local Security Operations Center (SOC) for triage.", 14, 210);
-    doc.text("• [CREDENTIAL RESET] Force invalidation of session identifiers on devices exposed to this file payload.", 14, 216);
-  } else {
-    doc.setTextColor(140, 255, 180);
-    doc.text("• [OPERATIONAL CLEARANCE] File exhibits no matching signatures across verified globally distributed threat catalogs.", 14, 198);
-    doc.text("• [RECOMMENDED ROUTINE] Continuous monitoring remains active via decentralized zero-trust protocol frameworks.", 14, 204);
-    doc.text("• [COMPLIANCE COMPLETED] Integrity signature cataloged within local immutable log system archives.", 14, 210);
-  }
-  
-  // WATERMARK BRANDING FOOTER
-  doc.setDrawColor(40, 40, 40);
-  doc.line(14, 275, 196, 275);
-  doc.setTextColor(80, 80, 80);
-  doc.setFontSize(8);
-  doc.text("Generated by NoxVault", 14, 281);
-  doc.text("NOTICE: THIS REPORT COMPREHENDS TELEMETRY RETRIEVED ON-DEMAND FROM THIRD PARTY UPPER-TIER INTEL INTELLIGENCE.", 74, 281);
-  
-  // STREAM DISPATCH TO USER LOCAL DEVICE
-  doc.save(`NoxVault_Advanced_Report_${Date.now()}.pdf`);
-}
+  isScanning  = true;
+  scanStart   = Date.now();
+  latestScanData = null;
+  resetDashboards();
+  initPipeline();
 
-function initPWA() {
-  window.addEventListener('online', () => document.getElementById('offline').classList.remove('on'));
-  window.addEventListener('offline', () => document.getElementById('offline').classList.add('on'));
-  if (!navigator.onLine) document.getElementById('offline').classList.add('on');
+  const btn = document.getElementById('scan-btn');
+  btn.disabled = true;
+  btn.classList.add('busy');
+  document.getElementById('scan-spin').classList.add('v');
+  updateBtnLabel();
+  window.addEventListener('beforeunload', exitInterceptor);
 
-  if ('serviceWorker' in navigator) {
-    const swCode = `
-      self.addEventListener('install', e => self.skipWaiting());
-      self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-      self.addEventListener('fetch', e => {
-        if (e.request.method === 'POST' || e.request.url.includes('/scan')) return;
-        e.respondWith(fetch(e.request).catch(() => new Response('Offline', { status: 200 })));
+  try {
+    // ── PHASE 1: Local pre-analysis ─────────────────────────
+    setPipe('p1','run',
+      currentLang==='zh'?'正在核對檔案狀態並計算 SHA-256 特徵碼...':'Checking file integrity and computing SHA-256 signature...');
+
+    if(!currentFileHash) {
+      try {
+        currentFileHash = await computeSHA256(selectedFile);
+        document.getElementById('hash-string').textContent = currentFileHash;
+        document.getElementById('hash-string').className   = 'sha-value';
+      } catch(hashErr) {
+        // SHA failure is non-fatal — warn but continue
+        document.getElementById('hash-string').textContent = t('hashError');
+        document.getElementById('hash-string').className   = 'sha-value error';
+        setPipe('p1','ok',
+          currentLang==='zh'
+            ? `SHA-256 計算失敗（非致命）：${hashErr.message} — 繼續上傳`
+            : `SHA-256 failed (non-fatal): ${hashErr.message} — continuing upload`,
+          Date.now()-scanStart);
+      }
+    }
+
+    if(currentFileHash) {
+      setPipe('p1','ok',
+        `SHA-256: ${currentFileHash.slice(0,16)}...`,
+        Date.now()-scanStart);
+    }
+
+    // ── PHASE 2: Build payload ──────────────────────────────
+    setPipe('p2','run',
+      currentLang==='zh'?'包裝 FormData 負載並核對認證標頭...':'Building FormData payload and validating auth header...');
+
+    const formData = new FormData();
+    formData.append('file', selectedFile);
+    // BUG FIX #4: DO NOT manually set Content-Type.
+    // Browser must auto-generate multipart/form-data + boundary.
+    // BUG FIX #5: X-Client-Secret always present.
+    const headers = { 'X-Client-Secret': AUTH_SECRET };
+
+    setPipe('p2','ok',
+      currentLang==='zh'
+        ? `負載就緒 · X-Client-Secret 已附加 · Content-Type 由瀏覽器自動產生`
+        : `Payload ready · X-Client-Secret attached · Content-Type auto-generated by browser`,
+      Date.now()-scanStart);
+
+    // ── PHASE 3: Upload & wait for response ─────────────────
+    setPipe('p3','run',
+      currentLang==='zh'?'正在傳輸二進位檔案流至遠端分析沙箱...':'Transmitting binary stream to remote analysis sandbox...');
+
+    let response;
+    try {
+      response = await fetch(API_ENDPOINT, {
+        method:  'POST',
+        headers: headers,
+        body:    formData
       });
-    `;
-    navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode], { type: 'application/javascript' }))).catch(() => {});
+    } catch(netErr) {
+      // fetch threw — network-level failure (no HTTP status)
+      const errMsg = String(netErr.message || netErr);
+      const isCORS = errMsg.toLowerCase().includes('cors') || errMsg.toLowerCase().includes('fetch');
+      showPipelineError('p3',
+        currentLang==='zh'?'階段 3 — 雲端沙箱威脅檢索':'Phase 3 — Cloud Sandbox Intelligence',
+        currentLang==='zh'?`網路層錯誤：${errMsg}`:`Network error: ${errMsg}`,
+        currentLang==='zh'
+          ? `fetch() 拋出例外，未取得 HTTP 狀態碼。常見原因：\n`
+          + `1. 瀏覽器的 CORS 政策阻擋了跨域請求（目標：${API_ENDPOINT}）\n`
+          + `2. Hugging Face Space 離線或正在冷啟動（需 30-60 秒）\n`
+          + `3. DNS 解析失敗或網路防火牆封鎖`
+          : `fetch() threw before receiving any HTTP status. Common causes:\n`
+          + `1. Browser CORS policy blocked cross-origin request to ${API_ENDPOINT}\n`
+          + `2. Hugging Face Space offline or cold-starting (30-60 sec)\n`
+          + `3. DNS failure or network firewall blocking`,
+        currentLang==='zh'
+          ? ['開啟 ${API_ENDPOINT} 確認 Space 是否可用',
+             '等待 30 秒後重試（Space 可能在冷啟動）',
+             '確認網路未封鎖 Hugging Face 網域',
+             '確認後端已設定 CORS（Access-Control-Allow-Origin: *）']
+          : [`Open ${API_ENDPOINT} to verify Space availability`,
+             'Wait 30s and retry (Space may be cold-starting)',
+             'Confirm network does not block Hugging Face domains',
+             'Verify backend has CORS enabled (Access-Control-Allow-Origin: *)'],
+        errMsg
+      );
+      return;
+    }
+
+    // HTTP error handling
+    if(!response.ok) {
+      let body = '';
+      try { body = await response.text(); } catch(e) {}
+
+      const httpDiag = buildHTTPErrorDiag(response.status, body);
+      showPipelineError('p3',
+        currentLang==='zh'?'階段 3 — 雲端沙箱威脅檢索':'Phase 3 — Cloud Sandbox Intelligence',
+        `HTTP ${response.status} ${response.statusText}`,
+        httpDiag.why, httpDiag.fixes,
+        `HTTP ${response.status}\n${body.slice(0,500)}`
+      );
+      return;
+    }
+
+    setPipe('p3','ok',
+      `HTTP ${response.status} OK · ${currentLang==='zh'?'回應已收到':'Response received'}`,
+      Date.now()-scanStart);
+
+    // ── PHASE 4: Parse & render ─────────────────────────────
+    // BUG FIX #2: response.json() fully awaited BEFORE renderResults()
+    setPipe('p4','run',
+      currentLang==='zh'?'執行 await response.json() 同步威脅判定結果...':'Awaiting response.json() to parse threat data...');
+
+    let rawData;
+    try {
+      rawData = await response.json();
+    } catch(parseErr) {
+      // Try to get raw text for diagnostics
+      let rawTxt = '';
+      try { rawTxt = await response.clone().text(); } catch(_) {}
+
+      showPipelineError('p4',
+        currentLang==='zh'?'階段 4 — 威脅判定與數據合成':'Phase 4 — Threat Matrix Synthesis',
+        currentLang==='zh'?'API 回傳非 JSON 格式':'API returned non-JSON',
+        currentLang==='zh'
+          ? `response.json() 解析失敗：${parseErr.message}\n\n常見原因：\n`
+          + `1. Hugging Face Space 回傳了 HTML 錯誤頁面（503 / 502 / Space 崩潰）\n`
+          + `2. API 端點 URL 不正確，伺服器回傳了 404 HTML 頁面\n`
+          + `3. 網路中間代理（CDN / WAF）攔截並修改了回應`
+          : `response.json() failed: ${parseErr.message}\n\nCommon causes:\n`
+          + `1. Hugging Face Space returned HTML error page (503/502/crash)\n`
+          + `2. Wrong API endpoint URL — server returned 404 HTML\n`
+          + `3. CDN/WAF proxy intercepted and modified the response`,
+        currentLang==='zh'
+          ? [`確認 API 端點：${API_ENDPOINT}`,
+             '在瀏覽器直接開啟 API URL 確認回應格式',
+             '稍後重試（Space 可能正在重啟）',
+             '查看後端日誌確認有無例外']
+          : [`Verify API endpoint: ${API_ENDPOINT}`,
+             'Open the API URL directly to inspect response format',
+             'Retry later (Space may be restarting)',
+             'Check backend logs for exceptions'],
+        `ParseError: ${parseErr.message}\n\nRaw response (first 400 chars):\n${rawTxt.slice(0,400)}`
+      );
+      return;
+    }
+
+    // Validate: must be an object
+    if(!rawData || typeof rawData !== 'object' || Array.isArray(rawData)) {
+      showPipelineError('p4',
+        currentLang==='zh'?'階段 4 — 威脅判定與數據合成':'Phase 4 — Threat Matrix Synthesis',
+        currentLang==='zh'?'回應不是有效 JSON 物件':'Response is not a valid JSON object',
+        currentLang==='zh'
+          ? `收到的資料型別為 ${typeof rawData}，預期為 object。\n後端可能回傳了陣列、字串或 null。`
+          : `Received type is ${typeof rawData}, expected object.\nBackend may have returned an array, string, or null.`,
+        currentLang==='zh'
+          ? ['確認後端 main.py 的 return 語句回傳的是字典（dict）而非列表','查看後端錯誤日誌']
+          : ['Verify backend main.py returns a dict, not a list','Check backend error logs'],
+        `Received: ${JSON.stringify(rawData).slice(0,200)}`
+      );
+      return;
+    }
+
+    // ── BUG FIX #3: Read EXACT API paths ───────────────────
+    //   data.reports.virustotal.malicious
+    //   data.reports.hybrid_analysis.threat_score
+    latestScanData = rawData;
+
+    setPipe('p4','ok',
+      currentLang==='zh'?'分析完成 — 正在渲染視覺化報告':'Analysis complete — rendering report',
+      Date.now()-scanStart);
+
+    renderResults(rawData);
+
+  } catch(unexpectedErr) {
+    // Catch-all for any unexpected JS error
+    setPipe('p4','err', String(unexpectedErr.message), Date.now()-scanStart);
+    showPipelineError('p4',
+      currentLang==='zh'?'階段 4 — 未預期錯誤':'Phase 4 — Unexpected Error',
+      String(unexpectedErr.message),
+      currentLang==='zh'
+        ? '前端發生未預期的 JavaScript 錯誤，可能是渲染邏輯異常。'
+        : 'An unexpected JavaScript error occurred in the frontend render logic.',
+      [currentLang==='zh'?'重新整理頁面後重試':'Refresh the page and retry'],
+      String(unexpectedErr.stack || unexpectedErr.message)
+    );
+  } finally {
+    isScanning = false;
+    window.removeEventListener('beforeunload', exitInterceptor);
+    btn.disabled = !selectedFile;
+    btn.classList.remove('busy');
+    document.getElementById('scan-spin').classList.remove('v');
+    updateBtnLabel();
   }
+}
+
+// ── HTTP error diagnostics ─────────────────────────────────────
+function buildHTTPErrorDiag(status, rawBody) {
+  const zh = currentLang === 'zh';
+  if(status === 403) return {
+    why: zh
+      ? `伺服器拒絕請求（403 Forbidden）。\n\n原因：X-Client-Secret 認證標頭的值不正確，或此 Token 已被後端撤銷。\n\n後端回應：${rawBody.slice(0,200)}`
+      : `Server rejected (403 Forbidden).\n\nCause: X-Client-Secret value is wrong, or token has been revoked.\n\nServer response: ${rawBody.slice(0,200)}`,
+    fixes: zh
+      ? ['確認 X-Client-Secret 值與後端設定完全一致','確認後端 SECRET_KEY 環境變數已正確設定','確認 Token 未過期或被撤銷']
+      : ['Verify X-Client-Secret matches the backend exactly','Check backend SECRET_KEY env var is set correctly','Verify token has not expired or been revoked']
+  };
+  if(status === 400) return {
+    why: zh
+      ? `後端回傳 400 Bad Request。\n\n可能原因：\n1. 上傳欄位名稱不符（後端期望 "file" 欄位）\n2. FormData 格式不正確\n3. 後端驗證規則拒絕了此請求\n\n後端回應：${rawBody.slice(0,300)}`
+      : `Backend returned 400 Bad Request.\n\nPossible causes:\n1. Upload field name mismatch (backend expects field named 'file')\n2. FormData format issue\n3. Backend validation rejected the request\n\nServer response: ${rawBody.slice(0,300)}`,
+    fixes: zh
+      ? ['確認後端接受欄位名稱為 "file" 的 multipart/form-data','查看後端日誌確認驗證邏輯','確認上傳的檔案類型在後端允許範圍內']
+      : ["Confirm backend accepts multipart/form-data with field 'file'","Check backend logs for validation logic","Ensure file type is allowed by backend"]
+  };
+  if(status === 413) return {
+    why: zh
+      ? `檔案過大（413 Payload Too Large）。後端設定的請求大小上限小於此檔案。\n\n後端回應：${rawBody.slice(0,200)}`
+      : `File too large (413 Payload Too Large). The server's configured limit is smaller than this file.\n\nServer response: ${rawBody.slice(0,200)}`,
+    fixes: zh
+      ? ['選擇小於 100MB 的檔案','或在後端增大 max content length 設定']
+      : ['Select a file under 100MB','Or increase max content length in backend config']
+  };
+  if(status === 429) return {
+    why: zh
+      ? '請求過於頻繁（429 Too Many Requests）。API 已觸發速率限制。'
+      : 'Too many requests (429). API rate limit has been triggered.',
+    fixes: zh
+      ? ['等待 60 秒後重試','避免短時間內多次掃描']
+      : ['Wait 60 seconds then retry','Avoid multiple rapid scans']
+  };
+  if(status === 503 || status === 502) return {
+    why: zh
+      ? `後端服務暫時不可用（${status}）。\n\n常見原因：Hugging Face Space 正在冷啟動（第一次使用後約需 30-60 秒）、或 Space 因閒置進入休眠狀態。\n\n後端回應：${rawBody.slice(0,200)}`
+      : `Backend service temporarily unavailable (${status}).\n\nCommon cause: Hugging Face Space cold start (30-60 sec on first use) or Space went to sleep after inactivity.\n\nServer response: ${rawBody.slice(0,200)}`,
+    fixes: zh
+      ? ['等待 30-60 秒後點擊重試','直接開啟 Space URL 手動喚醒','確認 Space 未被暫停或刪除']
+      : ['Wait 30-60s then click retry','Open Space URL directly to wake it up','Verify Space is not paused or deleted']
+  };
+  if(status >= 500) return {
+    why: zh
+      ? `後端內部錯誤（${status}）。後端 Python 程式或 VirusTotal / Hybrid Analysis API 發生異常。\n\n後端回應：${rawBody.slice(0,300)}`
+      : `Backend internal error (${status}). Backend Python or VT/HA API encountered an exception.\n\nServer response: ${rawBody.slice(0,300)}`,
+    fixes: zh
+      ? ['查看後端 Hugging Face Space 日誌','確認 VIRUSTOTAL_API_KEY 和 HYBRID_ANALYSIS_API_KEY 已在 Space Secrets 中設定','稍後重試']
+      : ['Check Hugging Face Space logs','Verify VIRUSTOTAL_API_KEY and HYBRID_ANALYSIS_API_KEY are set in Space Secrets','Retry later']
+  };
+  return {
+    why: zh
+      ? `伺服器回傳 HTTP ${status}。\n\n後端回應：${rawBody.slice(0,300)}`
+      : `Server returned HTTP ${status}.\n\nResponse: ${rawBody.slice(0,300)}`,
+    fixes: zh ? ['查看後端日誌','重試掃描'] : ['Check backend logs','Retry scan']
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER RESULTS
+//  Reads: data.reports.virustotal.malicious   (BUG FIX #3)
+//         data.reports.virustotal.scans
+//         data.reports.hybrid_analysis.threat_score
+// ═══════════════════════════════════════════════════════════════
+function renderResults(data) {
+  const elapsed = ((Date.now()-scanStart)/1000).toFixed(2)+'s';
+
+  // ── Extract engine data (exact API paths) ──────────────
+  const vt  = data?.reports?.virustotal;
+  const ha  = data?.reports?.hybrid_analysis;
+
+  let vtMalicious    = null;
+  let vtTotal        = null;
+  let vtScans        = null;
+  let haThreatScore  = null;
+  let hasEngineData  = false;
+
+  if(vt && typeof vt === 'object') {
+    if(vt.malicious  != null) { vtMalicious = Number(vt.malicious);  hasEngineData = true; }
+    else if(vt.positives != null) { vtMalicious = Number(vt.positives); hasEngineData = true; }
+    vtTotal = Number(vt.total ?? vt.engines_count ?? 0);
+    if(vt.scans && typeof vt.scans === 'object') vtScans = vt.scans;
+  }
+  // Flat fallback
+  if(vtMalicious === null && data.positives != null) {
+    vtMalicious = Number(data.positives); vtTotal = Number(data.total ?? 0); hasEngineData = true;
+  }
+  if(!vtScans && data.scans && typeof data.scans === 'object') vtScans = data.scans;
+
+  if(ha?.threat_score != null) { haThreatScore = Number(ha.threat_score); hasEngineData = true; }
+  if(haThreatScore === null && data.threat_score != null) { haThreatScore = Number(data.threat_score); hasEngineData = true; }
+
+  // ── Compute display score ──────────────────────────────
+  let score = null;
+  if(data.risk_score != null) score = Math.min(100, Math.max(0, Math.round(Number(data.risk_score))));
+  else if(vtMalicious !== null && vtTotal > 0)
+    score = Math.min(100, Math.round((vtMalicious/vtTotal)*100));
+  else if(haThreatScore !== null)
+    score = Math.min(100, Math.max(0, Math.round(haThreatScore)));
+
+  const isMalicious = (vtMalicious !== null && vtMalicious > 0) || (haThreatScore !== null && haThreatScore >= 70);
+  const level = isMalicious ? 'danger' : score !== null && score >= 30 ? 'warn' : score !== null ? 'safe' : 'nd';
+
+  // ── Danger banner ──────────────────────────────────────
+  const db = document.getElementById('danger-banner');
+  if(vtMalicious !== null && vtMalicious > 0) {
+    db.classList.add('v');
+    document.getElementById('db-sub').textContent =
+      `VirusTotal: ${vtMalicious}/${vtTotal} ${currentLang==='zh'?'引擎偵測為惡意':'engines flagged as malicious'}`;
+  }
+
+  // ── Score ring ─────────────────────────────────────────
+  const ring = document.getElementById('score-ring');
+  const numEl = document.getElementById('verdict-score');
+  ring.className  = 'score-ring '+level;
+  if(level === 'nd') {
+    numEl.textContent = '?';
+    numEl.style.fontSize = '';
+  } else {
+    numEl.textContent = score;
+    numEl.style.fontSize = '';
+  }
+
+  // ── Verdict text ───────────────────────────────────────
+  const vEl = document.getElementById('verdict-string');
+  vEl.className = 'verdict-str '+level;
+  vEl.textContent = !hasEngineData ? t('verdict_nodata')
+    : level === 'danger' ? t('verdict_danger')
+    : level === 'warn'   ? t('verdict_sus')
+    :                       t('verdict_clean');
+
+  document.getElementById('verdict-target-display').textContent = selectedFile?.name || '—';
+  document.getElementById('verdict-banner').className           = 'hero-banner '+level;
+
+  document.getElementById('chip-size').innerHTML = t('size')+`<b>${selectedFile?formatBytes(selectedFile.size):'—'}</b>`;
+  document.getElementById('chip-time').innerHTML = t('time')+`<b>${elapsed}</b>`;
+  document.getElementById('chip-eng').innerHTML  = t('engines')+`<b>${vtTotal||'—'}</b>`;
+
+  // ── Engine cards ───────────────────────────────────────
+  const cardVt = document.getElementById('res-vt');
+  const cardVtSub = document.getElementById('res-vt-sub');
+  const cardHa = document.getElementById('res-ha');
+  const cardHaSub = document.getElementById('res-ha-sub');
+
+  if(vtMalicious !== null) {
+    cardVt.textContent = `${vtMalicious} / ${vtTotal}`;
+    cardVt.className   = vtMalicious > 0 ? 'card-val danger' : 'card-val safe';
+    cardVtSub.textContent = currentLang==='zh' ? '惡意偵測數 / 總引擎數' : 'Malicious detections / total engines';
+  } else {
+    cardVt.textContent = t('verdict_nodata');
+    cardVt.className   = 'card-val muted';
+    cardVtSub.textContent = '';
+  }
+
+  if(haThreatScore !== null) {
+    cardHa.textContent = `${haThreatScore} / 100`;
+    cardHa.className   = haThreatScore >= 70 ? 'card-val danger' : haThreatScore >= 30 ? 'card-val warn' : 'card-val safe';
+    cardHaSub.textContent = currentLang==='zh' ? 'Hybrid Analysis 威脅評分' : 'Hybrid Analysis threat score';
+  } else {
+    cardHa.textContent = t('verdict_nodata');
+    cardHa.className   = 'card-val muted';
+    cardHaSub.textContent = '';
+  }
+
+  // ── Hash verification ──────────────────────────────────
+  const serverHash = data?.reports?.virustotal?.sha256
+    || data?.sha256 || data?.sha256_hash || data?.md5 || null;
+  const localHashEl = document.getElementById('res-local-hash');
+  localHashEl.textContent = currentFileHash || '—';
+  localHashEl.onclick     = () => currentFileHash && navigator.clipboard.writeText(currentFileHash).catch(()=>{});
+
+  const serverHashEl  = document.getElementById('res-server-hash');
+  const matchEl       = document.getElementById('res-hash-match');
+  if(serverHash) {
+    serverHashEl.textContent = serverHash;
+    const match = currentFileHash && serverHash.toLowerCase() === currentFileHash.toLowerCase();
+    matchEl.textContent = match ? t('hash_match') : t('hash_mismatch');
+    matchEl.className   = match ? 'card-val safe' : 'card-val warn';
+  } else {
+    serverHashEl.textContent = '—';
+    matchEl.textContent      = '';
+  }
+
+  // ── Engine breakdown (VT scans) ────────────────────────
+  renderEngineGrid(vtScans);
+
+  // ── Threats table ──────────────────────────────────────
+  renderThreatsTable(data, vtScans, ha);
+
+  // Show results
+  document.getElementById('results-dashboard').classList.add('v');
+  document.getElementById('results-dashboard').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+// ── Engine grid ────────────────────────────────────────────────
+function renderEngineGrid(scans) {
+  const grid = document.getElementById('eng-grid');
+  if(!scans || Object.keys(scans).length === 0) {
+    grid.style.cssText = 'display:block;padding:16px;font-size:.68rem;color:var(--t3);background:var(--bg2);border:1px solid var(--b1)';
+    grid.textContent   = t('no_eng_detail');
+    return;
+  }
+  grid.style.cssText = '';
+  grid.innerHTML = '';
+  Object.entries(scans)
+    .sort((a,b) => { if(a[1].detected && !b[1].detected) return -1; if(!a[1].detected && b[1].detected) return 1; return a[0].localeCompare(b[0]); })
+    .forEach(([name, res]) => {
+      const d  = res?.detected === true;
+      const el = document.createElement('div');
+      el.className = 'eng-row';
+      el.innerHTML = `<span class="eng-name" title="${esc(name)}">${esc(name)}</span>
+        <span class="eng-res ${d?'det':'cl'}">${d ? esc(res.result||'Detected') : (currentLang==='zh'?'無威脅':'Clean')}</span>`;
+      grid.appendChild(el);
+    });
+}
+
+// ── Threats table ──────────────────────────────────────────────
+function renderThreatsTable(data, vtScans, ha) {
+  const tbody  = document.getElementById('thr-body');
+  const threats = [];
+
+  if(vtScans) {
+    Object.entries(vtScans).forEach(([name, r]) => {
+      if(r?.detected) threats.push({
+        ind: r.result || 'Malware', cat: name, sev: 'CRITICAL',
+        det: `v${r.version||'?'} upd:${r.update||'—'}`
+      });
+    });
+  }
+  if(Array.isArray(data.threats)) {
+    data.threats.forEach(th => threats.push({
+      ind: th.name||th.indicator||'—', cat: th.category||th.type||'—',
+      sev: th.severity||'MEDIUM', det: th.detail||th.description||'—'
+    }));
+  }
+  if(ha?.verdict && !/^no specific/i.test(ha.verdict)) {
+    threats.push({ ind: ha.verdict, cat: 'Hybrid Analysis',
+      sev: /malicious|trojan/i.test(ha.verdict)?'HIGH':'MEDIUM',
+      det: ha.threat_score!=null ? `Score: ${ha.threat_score}` : '—' });
+  }
+
+  tbody.innerHTML = '';
+  if(threats.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="sok" style="text-align:center;padding:16px">${t('no_threat')}</td></tr>`;
+    return;
+  }
+  threats.forEach(th => {
+    const sv = {CRITICAL:'sc',HIGH:'sh',MEDIUM:'sm',LOW:'sl'}[th.sev.toUpperCase()] || 'sok';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${esc(th.ind)}</td><td>${esc(th.cat)}</td>
+      <td><span class="sv ${sv}">${esc(th.sev)}</span></td>
+      <td>${esc(th.det)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Copy raw JSON ──────────────────────────────────────────────
+function copyRaw() {
+  if(!latestScanData) return;
+  navigator.clipboard.writeText(JSON.stringify(latestScanData, null, 2)).catch(()=>{});
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PDF EXPORT
+// ═══════════════════════════════════════════════════════════════
+function generatePDF() {
+  if(!latestScanData) return;
+  const orig = document.getElementById('ui-btn-pdf-t').textContent;
+  document.getElementById('ui-btn-pdf-t').textContent = currentLang==='zh'?'產生中...':'Generating...';
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    const W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+    const M = 14;
+
+    const vt    = latestScanData?.reports?.virustotal;
+    const ha    = latestScanData?.reports?.hybrid_analysis;
+    const vtMal = vt?.malicious != null ? Number(vt.malicious) : (vt?.positives != null ? Number(vt.positives) : null);
+    const haScr = ha?.threat_score != null ? Number(ha.threat_score) : null;
+    const isBad = (vtMal !== null && vtMal > 0) || (haScr !== null && haScr >= 70);
+
+    // Background
+    doc.setFillColor(0,0,0); doc.rect(0,0,W,H,'F');
+
+    // Header
+    doc.setFillColor(10,10,10); doc.rect(0,0,W,18,'F');
+    doc.setFont('courier','bold'); doc.setFontSize(10); doc.setTextColor(0,255,136);
+    doc.text('NOXVAULT SECURITY INTEGRITY REPORT', M, 12);
+    doc.setFontSize(6); doc.setTextColor(60,60,60);
+    doc.text(new Date().toISOString().replace('T',' ').slice(0,19)+' UTC', W-M, 12, {align:'right'});
+
+    let y = 26;
+
+    // Verdict block
+    const vc = isBad ? [255,34,34] : [0,204,102];
+    doc.setFillColor(...vc); doc.rect(M, y, W-M*2, 14, 'F');
+    doc.setFont('courier','bold'); doc.setFontSize(9); doc.setTextColor(255,255,255);
+    doc.text(isBad
+      ? 'SYSTEM VERDICT: MALICIOUS ACTIVE THREAT VECTOR DETECTED'
+      : 'SYSTEM VERDICT: NO COMPROMISE IDENTIFIED (CLEAN / SAFE)',
+      M+4, y+9);
+    y += 20;
+
+    // File metadata
+    doc.setFont('courier','bold'); doc.setFontSize(7); doc.setTextColor(80,80,80);
+    doc.text('// TARGET FILE METADATA', M, y); y += 4;
+    doc.setDrawColor(22,22,22); doc.line(M,y,W-M,y); y += 6;
+    const meta = [
+      ['File Name', selectedFile?.name||'—'],
+      ['File Size', selectedFile?formatBytes(selectedFile.size):'—'],
+      ['SHA-256',   currentFileHash||'—'],
+    ];
+    meta.forEach(([k,v]) => {
+      doc.setFont('courier','normal'); doc.setFontSize(6.5); doc.setTextColor(100,100,100);
+      doc.text(k+':', M, y+4);
+      doc.setFont('courier','bold'); doc.setTextColor(180,180,180);
+      doc.text(String(v).slice(0,65), M+26, y+4);
+      y += 8;
+    });
+    y += 4;
+
+    // Dual engine
+    doc.setFont('courier','bold'); doc.setFontSize(7); doc.setTextColor(80,80,80);
+    doc.text('// DUAL-ENGINE THREAT TELEMETRY', M, y); y += 4;
+    doc.setDrawColor(22,22,22); doc.line(M,y,W-M,y); y += 5;
+
+    const colW = (W-M*2-4)/2;
+    [[  'VIRUSTOTAL',
+        vtMal!==null ? (vtMal>0?[255,34,34]:[0,200,80]) : [80,80,80],
+        vtMal!==null ? (vtMal>0?'MALICIOUS':'CLEAN') : 'N/A',
+        vtMal!==null ? `${vtMal} of ${vt?.total||'?'} engines flagged` : 'No data received',
+     ],
+     [  'HYBRID ANALYSIS',
+        haScr!==null ? (haScr>=70?[255,34,34]:haScr>=30?[255,170,0]:[0,200,80]) : [80,80,80],
+        haScr!==null ? (haScr>=70?'HIGH RISK':'LOW RISK') : 'N/A',
+        haScr!==null ? `Threat Score: ${haScr}/100` : 'No data received',
+     ]
+    ].forEach(([engine, color, status, detail], i) => {
+      const cx = M + i*(colW+4);
+      doc.setFillColor(10,10,10); doc.setDrawColor(28,28,28);
+      doc.rect(cx, y, colW, 22, 'FD');
+      doc.setFont('courier','bold'); doc.setFontSize(6); doc.setTextColor(80,80,80);
+      doc.text(engine, cx+3, y+6);
+      doc.setFont('courier','bold'); doc.setFontSize(8); doc.setTextColor(...color);
+      doc.text(status, cx+3, y+13);
+      doc.setFont('courier','normal'); doc.setFontSize(6); doc.setTextColor(100,100,100);
+      doc.text(detail.slice(0,35), cx+3, y+19);
+    });
+    y += 30;
+
+    // VT engine breakdown
+    if(vtMal !== null && vtMal > 0 && vt?.scans) {
+      doc.setFont('courier','bold'); doc.setFontSize(7); doc.setTextColor(80,80,80);
+      doc.text('// DETECTED ENGINES', M, y); y += 4;
+      doc.setDrawColor(22,22,22); doc.line(M,y,W-M,y); y += 5;
+      const detected = Object.entries(vt.scans).filter(([,r])=>r?.detected).slice(0,20);
+      detected.forEach(([name, r]) => {
+        if(y > H-18) { doc.addPage(); doc.setFillColor(0,0,0); doc.rect(0,0,W,H,'F'); y = M; }
+        doc.setFont('courier','normal'); doc.setFontSize(6); doc.setTextColor(180,180,180);
+        doc.text(name.slice(0,28), M+2, y+4);
+        doc.setTextColor(255,85,85);
+        doc.text(String(r.result||'Detected').slice(0,40), M+56, y+4);
+        doc.setDrawColor(20,20,20); doc.line(M,y+6,W-M,y+6); y += 8;
+      });
+      y += 4;
+    }
+
+    // Footer on all pages
+    const total = doc.internal.getNumberOfPages();
+    for(let p=1;p<=total;p++) {
+      doc.setPage(p);
+      doc.setFillColor(5,5,5); doc.rect(0,H-10,W,10,'F');
+      doc.setFont('courier','normal'); doc.setFontSize(6);
+      doc.setTextColor(50,50,50);
+      doc.text('Generated by NoxVault', M, H-4);
+      doc.text(`Page ${p}/${total}`, W-M, H-4, {align:'right'});
+      doc.setTextColor(0,180,70);
+      doc.text('NoxVault Security Report — CONFIDENTIAL', W/2, H-4, {align:'center'});
+    }
+
+    const fn = (selectedFile?.name.replace(/[^a-zA-Z0-9._-]/g,'_')||'scan')+'_NoxVault.pdf';
+    doc.save(fn);
+  } catch(e) {
+    alert('PDF export failed: '+e.message);
+  } finally {
+    document.getElementById('ui-btn-pdf-t').textContent = orig;
+  }
+}
+
+// ── Service Worker (POST passthrough — BUG FIX #6) ─────────────
+if('serviceWorker' in navigator) {
+  const swCode = `
+self.addEventListener('install',  e => self.skipWaiting());
+self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+self.addEventListener('fetch', e => {
+  const m = e.request.method, u = e.request.url;
+  // BUG FIX #6: POST must use e.respondWith(fetch(...))
+  // A bare "return" hangs the request in Chromium-based browsers.
+  if(m === 'POST' || u.includes('hf.space') || u.includes('/scan')) {
+    e.respondWith(fetch(e.request)); return;
+  }
+  e.respondWith(fetch(e.request).catch(() => new Response(
+    '<html><head><meta charset="UTF-8"><style>html,body{margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh;flex-direction:column;gap:14px;font-family:monospace}h1{color:#ff2222;font-size:clamp(.9rem,4vw,1.8rem);letter-spacing:.2em;text-transform:uppercase;animation:blink 1s step-end infinite}p{color:#444;font-size:.7rem}@keyframes blink{50%{opacity:0}}</style></head><body><h1>OFFLINE — SYSTEM HALTED</h1><p>RESTORE NETWORK CONNECTION TO RESUME</p></body></html>',
+    { headers: {'Content-Type':'text/html'} }
+  )));
+});`;
+  navigator.serviceWorker.register(
+    URL.createObjectURL(new Blob([swCode], {type:'application/javascript'}))
+  ).catch(()=>{});
 }
 </script>
 </body>
