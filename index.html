@@ -504,6 +504,19 @@ footer {
           <div class="chip" id="chip-size">SIZE: <b>—</b></div>
           <div class="chip" id="chip-time">TIME: <b>—</b></div>
           <div class="chip" id="chip-eng">ENGINES: <b>—</b></div>
+          <div class="chip" id="chip-cache"><b style="color:var(--t3)">—</b></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUEUED NOTICE — shown when file is new, sandbox submitted -->
+    <div id="queued-notice" style="display:none;border:1px solid var(--y);background:rgba(255,170,0,.06);padding:12px 16px;margin-top:1px;flex-direction:row;align-items:flex-start;gap:12px">
+      <div style="font-size:1.1rem;flex-shrink:0;animation:blink .9s step-end infinite">⏳</div>
+      <div>
+        <div style="font-size:.72rem;font-weight:800;color:var(--y);letter-spacing:.1em;text-transform:uppercase">沙箱分析排隊中 — SANDBOX QUEUED</div>
+        <div style="font-size:.64rem;color:var(--y2);margin-top:5px;letter-spacing:.04em;line-height:1.65">
+          此為全球首次掃描的未知檔案。已非同步提交至 VirusTotal / Hybrid Analysis 沙箱排隊分析。<br>
+          通常需要 <b style="color:var(--y)">2 ～ 5 分鐘</b>。請稍後重新上傳相同檔案，系統將直接從快取取得完整報告（約 0.2 秒）。
         </div>
       </div>
     </div>
@@ -515,9 +528,9 @@ footer {
       <span id="ui-mem-txt">檔案已從伺服器記憶體中銷毀 — 無任何資料留存</span>
     </div>
 
-    <!-- Dual engine cards -->
+    <!-- Primary engines: VT + HA -->
     <div>
-      <div class="slbl" id="lbl-engine-detail">// 雙核心引擎分析</div>
+      <div class="slbl" id="lbl-engine-detail">// 主引擎分析</div>
       <div class="details-grid">
         <div class="details-card">
           <div class="card-lbl">VirusTotal — 惡意引擎偵測數</div>
@@ -528,6 +541,58 @@ footer {
           <div class="card-lbl">Hybrid Analysis — 威脅評分</div>
           <div class="card-val" id="res-ha">—</div>
           <div style="font-size:.6rem;color:var(--t3)" id="res-ha-sub">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Extended engines: urlscan / OTX / Pulsedive / CriminalIP / GSB / AbuseIPDB -->
+    <div>
+      <div class="slbl" id="lbl-ext-engines">// 延伸情報引擎</div>
+      <div class="details-grid" id="ext-engines-grid">
+        <div class="details-card">
+          <div class="card-lbl">urlscan.io — 惡意記錄數</div>
+          <div class="card-val" id="res-urlscan">—</div>
+          <div style="font-size:.6rem;color:var(--t3)" id="res-urlscan-sub">—</div>
+        </div>
+        <div class="details-card">
+          <div class="card-lbl">AlienVault OTX — 威脅脈衝數</div>
+          <div class="card-val" id="res-otx">—</div>
+          <div style="font-size:.6rem;color:var(--t3)" id="res-otx-sub">—</div>
+        </div>
+        <div class="details-card">
+          <div class="card-lbl">Pulsedive — 風險等級</div>
+          <div class="card-val" id="res-pulsedive">—</div>
+          <div style="font-size:.6rem;color:var(--t3)" id="res-pulsedive-sub">—</div>
+        </div>
+        <div class="details-card">
+          <div class="card-lbl">Criminal IP — 風險分數</div>
+          <div class="card-val" id="res-criminalip">—</div>
+          <div style="font-size:.6rem;color:var(--t3)" id="res-criminalip-sub">—</div>
+        </div>
+        <div class="details-card">
+          <div class="card-lbl">Google Safe Browsing — 威脅命中</div>
+          <div class="card-val" id="res-gsb">—</div>
+          <div style="font-size:.6rem;color:var(--t3)" id="res-gsb-sub">—</div>
+        </div>
+        <div class="details-card">
+          <div class="card-lbl">AbuseIPDB — 最高濫用分數</div>
+          <div class="card-val" id="res-abuseipdb">—</div>
+          <div style="font-size:.6rem;color:var(--t3)" id="res-abuseipdb-sub">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IOC extraction summary -->
+    <div id="ioc-section" style="display:none">
+      <div class="slbl">// 靜態 IOC 提取</div>
+      <div class="details-grid">
+        <div class="details-card">
+          <div class="card-lbl">提取的 URL 數量</div>
+          <div class="card-val" id="res-ioc-urls">—</div>
+        </div>
+        <div class="details-card">
+          <div class="card-lbl">提取的公網 IP 數量</div>
+          <div class="card-val" id="res-ioc-ips">—</div>
         </div>
       </div>
     </div>
@@ -587,7 +652,7 @@ footer {
 
 </main>
 <footer>
-  <div>NOXVAULT SECURE FRAMEWORK v4.0</div>
+  <div>NOXVAULT SECURE FRAMEWORK v6.0 — HASH-LOOKUP FIRST</div>
   <div id="f-clock">—</div>
 </footer>
 </div><!-- /app -->
@@ -595,11 +660,19 @@ footer {
 <script>
 'use strict';
 // ═══════════════════════════════════════════════════════════════
-//  NoxVault v4.0
+//  NoxVault v5.0
 //  Frontend — File Scanner with full pipeline diagnostics
+//  Hosted: https://gc-apps-tw.github.io/NoxVault
 //  API: POST multipart/form-data  →  X-Client-Secret header
-//  Reads: data.reports.virustotal.malicious
-//         data.reports.hybrid_analysis.threat_score
+//  Reads:
+//    data.reports.virustotal.malicious
+//    data.reports.hybrid_analysis.threat_score
+//    data.reports.urlscan.malicious
+//    data.reports.otx.pulse_count
+//    data.reports.pulsedive.risk
+//    data.reports.criminalip.score
+//    data.reports.google_safebrowsing.matches
+//    data.reports.abuseipdb.max_abuse_score
 // ═══════════════════════════════════════════════════════════════
 
 const API_ENDPOINT = "https://oliver2013tw-noxvault-api.hf.space/scan";
@@ -1233,114 +1306,159 @@ function buildHTTPErrorDiag(status, rawBody) {
 //         data.reports.hybrid_analysis.threat_score
 // ═══════════════════════════════════════════════════════════════
 function renderResults(data) {
-  const elapsed = ((Date.now()-scanStart)/1000).toFixed(2)+'s';
+  const zh      = currentLang === 'zh';
+  const elapsed = ((Date.now() - scanStart) / 1000).toFixed(2) + 's';
+
+  // ── API v6 meta fields ─────────────────────────────────
+  const apiStatus   = data.status    || 'ok';      // "ok" | "queued"
+  const cacheHit    = data.cache_hit || 'unknown'; // "full" | "partial" | "none" | "unknown"
+  const elapsedMs   = data.elapsed_ms != null ? data.elapsed_ms + 'ms' : elapsed;
+  const isQueued    = apiStatus === 'queued';
 
   // ── Extract engine data (exact API paths) ──────────────
-  const vt  = data?.reports?.virustotal;
-  const ha  = data?.reports?.hybrid_analysis;
+  const vt = data?.reports?.virustotal;
+  const ha = data?.reports?.hybrid_analysis;
 
-  let vtMalicious    = null;
-  let vtTotal        = null;
-  let vtScans        = null;
-  let haThreatScore  = null;
-  let hasEngineData  = false;
-
-  if(vt && typeof vt === 'object') {
+  // VT
+  let vtMalicious = null, vtTotal = null, vtScans = null, hasEngineData = false;
+  if(vt && typeof vt === 'object' && !vt.error && !vt.queued) {
     if(vt.malicious  != null) { vtMalicious = Number(vt.malicious);  hasEngineData = true; }
     else if(vt.positives != null) { vtMalicious = Number(vt.positives); hasEngineData = true; }
-    vtTotal = Number(vt.total ?? vt.engines_count ?? 0);
+    vtTotal = Number(vt.total ?? 0);
     if(vt.scans && typeof vt.scans === 'object') vtScans = vt.scans;
-  }
-  // Flat fallback
-  if(vtMalicious === null && data.positives != null) {
-    vtMalicious = Number(data.positives); vtTotal = Number(data.total ?? 0); hasEngineData = true;
   }
   if(!vtScans && data.scans && typeof data.scans === 'object') vtScans = data.scans;
 
-  if(ha?.threat_score != null) { haThreatScore = Number(ha.threat_score); hasEngineData = true; }
-  if(haThreatScore === null && data.threat_score != null) { haThreatScore = Number(data.threat_score); hasEngineData = true; }
+  // HA
+  let haThreatScore = null;
+  if(ha && typeof ha === 'object' && !ha.error && !ha.queued) {
+    if(ha.threat_score != null) { haThreatScore = Number(ha.threat_score); hasEngineData = true; }
+  }
+  if(haThreatScore === null && data.threat_score != null) {
+    haThreatScore = Number(data.threat_score); hasEngineData = true;
+  }
+
+  // ── Queued status banner ───────────────────────────────
+  const queuedNotice = document.getElementById('queued-notice');
+  if(queuedNotice) {
+    queuedNotice.style.display = isQueued ? 'flex' : 'none';
+  }
 
   // ── Compute display score ──────────────────────────────
   let score = null;
   if(data.risk_score != null) score = Math.min(100, Math.max(0, Math.round(Number(data.risk_score))));
   else if(vtMalicious !== null && vtTotal > 0)
-    score = Math.min(100, Math.round((vtMalicious/vtTotal)*100));
+    score = Math.min(100, Math.round((vtMalicious / vtTotal) * 100));
   else if(haThreatScore !== null)
     score = Math.min(100, Math.max(0, Math.round(haThreatScore)));
 
-  const isMalicious = (vtMalicious !== null && vtMalicious > 0) || (haThreatScore !== null && haThreatScore >= 70);
-  const level = isMalicious ? 'danger' : score !== null && score >= 30 ? 'warn' : score !== null ? 'safe' : 'nd';
+  const isMalicious = (vtMalicious !== null && vtMalicious > 0) ||
+                      (haThreatScore !== null && haThreatScore >= 70);
+  const level = isMalicious ? 'danger'
+    : score !== null && score >= 30 ? 'warn'
+    : score !== null ? 'safe'
+    : isQueued ? 'queued'
+    : 'nd';
 
-  // ── Danger banner ──────────────────────────────────────
+  // ── Danger banner (VT malicious > 0) ──────────────────
   const db = document.getElementById('danger-banner');
   if(vtMalicious !== null && vtMalicious > 0) {
     db.classList.add('v');
-    document.getElementById('db-sub').textContent =
-      `VirusTotal: ${vtMalicious}/${vtTotal} ${currentLang==='zh'?'引擎偵測為惡意':'engines flagged as malicious'}`;
+    document.getElementById('db-title').textContent = t('db_title');
+    document.getElementById('db-sub').textContent   =
+      `VirusTotal: ${vtMalicious}/${vtTotal} ${zh ? '引擎偵測為惡意' : 'engines flagged as malicious'}`;
+  } else {
+    db.classList.remove('v');
   }
 
   // ── Score ring ─────────────────────────────────────────
-  const ring = document.getElementById('score-ring');
+  const ring  = document.getElementById('score-ring');
   const numEl = document.getElementById('verdict-score');
-  ring.className  = 'score-ring '+level;
-  if(level === 'nd') {
-    numEl.textContent = '?';
-    numEl.style.fontSize = '';
-  } else {
-    numEl.textContent = score;
-    numEl.style.fontSize = '';
-  }
+  // Map level to ring class
+  const ringClass = { danger:'danger', warn:'warn', safe:'safe', queued:'warn', nd:'nd' }[level] || 'nd';
+  ring.className = 'score-ring ' + ringClass;
+  numEl.textContent = isQueued ? '⏳' : score !== null ? score : '?';
+  numEl.style.fontSize = isQueued ? '1rem' : '';
 
   // ── Verdict text ───────────────────────────────────────
   const vEl = document.getElementById('verdict-string');
-  vEl.className = 'verdict-str '+level;
-  vEl.textContent = !hasEngineData ? t('verdict_nodata')
-    : level === 'danger' ? t('verdict_danger')
-    : level === 'warn'   ? t('verdict_sus')
-    :                       t('verdict_clean');
+  vEl.className = 'verdict-str ' + (level === 'queued' ? 'warn' : level);
+  if(isQueued) {
+    vEl.textContent = zh ? '沙箱排隊分析中 (QUEUED)' : 'SANDBOX QUEUED FOR ANALYSIS';
+  } else {
+    vEl.textContent = !hasEngineData ? t('verdict_nodata')
+      : level === 'danger' ? t('verdict_danger')
+      : level === 'warn'   ? t('verdict_sus')
+      :                       t('verdict_clean');
+  }
 
   document.getElementById('verdict-target-display').textContent = selectedFile?.name || '—';
-  document.getElementById('verdict-banner').className           = 'hero-banner '+level;
+  document.getElementById('verdict-banner').className = 'hero-banner ' +
+    (level === 'queued' ? 'warn' : level !== 'nd' ? level : '');
 
-  document.getElementById('chip-size').innerHTML = t('size')+`<b>${selectedFile?formatBytes(selectedFile.size):'—'}</b>`;
-  document.getElementById('chip-time').innerHTML = t('time')+`<b>${elapsed}</b>`;
-  document.getElementById('chip-eng').innerHTML  = t('engines')+`<b>${vtTotal||'—'}</b>`;
+  // ── Chips ──────────────────────────────────────────────
+  document.getElementById('chip-size').innerHTML    = t('size')    + `<b>${selectedFile ? formatBytes(selectedFile.size) : '—'}</b>`;
+  document.getElementById('chip-time').innerHTML    = t('time')    + `<b>${elapsedMs}</b>`;
+  document.getElementById('chip-eng').innerHTML     = t('engines') + `<b>${vtTotal || '—'}</b>`;
 
-  // ── Engine cards ───────────────────────────────────────
-  const cardVt = document.getElementById('res-vt');
+  // ── Cache hit status chip (new in v6) ──────────────────
+  const chipCache = document.getElementById('chip-cache');
+  if(chipCache) {
+    const cacheLabel = {
+      full:    zh ? '⚡ 快取命中 (FULL)'    : '⚡ CACHE HIT (FULL)',
+      partial: zh ? '⚡ 快取部分命中'        : '⚡ CACHE PARTIAL',
+      none:    zh ? '⏫ 首次掃描 (UPLOADED)' : '⏫ FIRST CONTACT (UPLOADED)',
+      unknown: '—',
+    }[cacheHit] || '—';
+    const cacheColor = cacheHit === 'full' ? 'var(--g)' : cacheHit === 'none' ? 'var(--y)' : 'var(--t2)';
+    chipCache.innerHTML = `<b style="color:${cacheColor}">${cacheLabel}</b>`;
+  }
+
+  // ── VT card ────────────────────────────────────────────
+  const cardVt    = document.getElementById('res-vt');
   const cardVtSub = document.getElementById('res-vt-sub');
-  const cardHa = document.getElementById('res-ha');
-  const cardHaSub = document.getElementById('res-ha-sub');
-
-  if(vtMalicious !== null) {
-    cardVt.textContent = `${vtMalicious} / ${vtTotal}`;
-    cardVt.className   = vtMalicious > 0 ? 'card-val danger' : 'card-val safe';
-    cardVtSub.textContent = currentLang==='zh' ? '惡意偵測數 / 總引擎數' : 'Malicious detections / total engines';
+  if(vt?.queued) {
+    cardVt.textContent    = zh ? '已提交，等待分析' : 'Submitted — awaiting analysis';
+    cardVt.className      = 'card-val warn';
+    cardVtSub.textContent = vt.analysis_id ? `Analysis ID: ${vt.analysis_id}` : '';
+  } else if(vtMalicious !== null) {
+    cardVt.textContent    = `${vtMalicious} / ${vtTotal}`;
+    cardVt.className      = vtMalicious > 0 ? 'card-val danger' : 'card-val safe';
+    cardVtSub.textContent = zh ? `惡意偵測數 / 總引擎數 | 快取: ${vt?.cache_hit ? '是' : '否'}`
+                                : `Malicious / Total | Cache: ${vt?.cache_hit ? 'Yes' : 'No'}`;
   } else {
-    cardVt.textContent = t('verdict_nodata');
-    cardVt.className   = 'card-val muted';
+    cardVt.textContent    = vt?.error === 'not_configured' ? (zh ? '未設定 API Key' : 'API Key not set') : t('verdict_nodata');
+    cardVt.className      = 'card-val muted';
     cardVtSub.textContent = '';
   }
 
-  if(haThreatScore !== null) {
-    cardHa.textContent = `${haThreatScore} / 100`;
-    cardHa.className   = haThreatScore >= 70 ? 'card-val danger' : haThreatScore >= 30 ? 'card-val warn' : 'card-val safe';
-    cardHaSub.textContent = currentLang==='zh' ? 'Hybrid Analysis 威脅評分' : 'Hybrid Analysis threat score';
+  // ── HA card ────────────────────────────────────────────
+  const cardHa    = document.getElementById('res-ha');
+  const cardHaSub = document.getElementById('res-ha-sub');
+  if(ha?.queued) {
+    cardHa.textContent    = zh ? '已提交至沙箱，等待分析' : 'Submitted to sandbox — awaiting analysis';
+    cardHa.className      = 'card-val warn';
+    cardHaSub.textContent = zh ? 'Hybrid Analysis 沙箱排隊中' : 'Hybrid Analysis sandbox queued';
+  } else if(haThreatScore !== null) {
+    cardHa.textContent    = `${haThreatScore} / 100`;
+    cardHa.className      = haThreatScore >= 70 ? 'card-val danger' : haThreatScore >= 30 ? 'card-val warn' : 'card-val safe';
+    cardHaSub.textContent = zh ? `Hybrid Analysis 威脅評分 | 快取: ${ha?.cache_hit ? '是' : '否'}`
+                                : `HA Threat Score | Cache: ${ha?.cache_hit ? 'Yes' : 'No'}`;
   } else {
-    cardHa.textContent = t('verdict_nodata');
-    cardHa.className   = 'card-val muted';
+    cardHa.textContent    = ha?.error === 'not_configured' ? (zh ? '未設定 API Key' : 'API Key not set') : t('verdict_nodata');
+    cardHa.className      = 'card-val muted';
     cardHaSub.textContent = '';
   }
 
   // ── Hash verification ──────────────────────────────────
-  const serverHash = data?.reports?.virustotal?.sha256
-    || data?.sha256 || data?.sha256_hash || data?.md5 || null;
+  const serverHash  = data?.sha256 || data?.reports?.virustotal?.sha256 || null;
   const localHashEl = document.getElementById('res-local-hash');
   localHashEl.textContent = currentFileHash || '—';
-  localHashEl.onclick     = () => currentFileHash && navigator.clipboard.writeText(currentFileHash).catch(()=>{});
+  localHashEl.style.cursor = currentFileHash ? 'pointer' : '';
+  localHashEl.onclick = () => currentFileHash && navigator.clipboard.writeText(currentFileHash).catch(() => {});
 
-  const serverHashEl  = document.getElementById('res-server-hash');
-  const matchEl       = document.getElementById('res-hash-match');
+  const serverHashEl = document.getElementById('res-server-hash');
+  const matchEl      = document.getElementById('res-hash-match');
   if(serverHash) {
     serverHashEl.textContent = serverHash;
     const match = currentFileHash && serverHash.toLowerCase() === currentFileHash.toLowerCase();
@@ -1349,20 +1467,149 @@ function renderResults(data) {
   } else {
     serverHashEl.textContent = '—';
     matchEl.textContent      = '';
+    matchEl.className        = '';
   }
 
-  // ── Engine breakdown (VT scans) ────────────────────────
+  // ── Engine breakdown grid (VT per-engine scans) ────────
   renderEngineGrid(vtScans);
+
+  // ── Extended engines ───────────────────────────────────
+  renderExtEngines(data);
+
+  // ── IOC summary ────────────────────────────────────────
+  const iocSection = document.getElementById('ioc-section');
+  if(data.iocs && (data.iocs.urls_found > 0 || data.iocs.ips_found > 0)) {
+    iocSection.style.display = '';
+    document.getElementById('res-ioc-urls').textContent = data.iocs.urls_found ?? 0;
+    document.getElementById('res-ioc-ips').textContent  = data.iocs.ips_found  ?? 0;
+  } else {
+    iocSection.style.display = 'none';
+  }
 
   // ── Threats table ──────────────────────────────────────
   renderThreatsTable(data, vtScans, ha);
 
-  // Show results
+  // ── Show dashboard ─────────────────────────────────────
   document.getElementById('results-dashboard').classList.add('v');
-  document.getElementById('results-dashboard').scrollIntoView({ behavior:'smooth', block:'start' });
+  document.getElementById('results-dashboard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ── Engine grid ────────────────────────────────────────────────
+// ── Extended engines rendering ────────────────────────────────
+function renderExtEngines(data) {
+  const zh = currentLang === 'zh';
+  const r  = data.reports || {};
+
+  // ── urlscan ──
+  const us = r.urlscan;
+  setEngCard('res-urlscan', 'res-urlscan-sub',
+    us, us?.malicious,
+    v => `${v} ${zh?'筆惡意記錄':'malicious records'}`,
+    v => v > 0 ? 'danger' : 'safe',
+    zh ? 'urlscan.io 歷史掃描命中' : 'urlscan.io historical hits',
+    zh ? `共搜尋 ${us?.total??0} 筆記錄` : `${us?.total??0} records found`
+  );
+
+  // ── OTX ──
+  const otx = r.otx;
+  setEngCard('res-otx', 'res-otx-sub',
+    otx, otx?.pulse_count,
+    v => `${v} ${zh?'個威脅脈衝':'threat pulses'}`,
+    v => v > 5 ? 'danger' : v > 0 ? 'warn' : 'safe',
+    zh ? 'AlienVault OTX 情報脈衝' : 'AlienVault OTX pulses',
+    otx?.malware_families?.length
+      ? `${zh?'家族：':'Families: '}${otx.malware_families.filter(Boolean).join(', ').slice(0,60)}`
+      : ''
+  );
+
+  // ── Pulsedive ──
+  const pd = r.pulsedive;
+  const pdRiskColor = { none:'safe', low:'safe', medium:'warn', high:'danger', critical:'danger' };
+  setEngCard('res-pulsedive', 'res-pulsedive-sub',
+    pd, pd?.risk,
+    v => String(v).toUpperCase(),
+    v => pdRiskColor[String(v).toLowerCase()] || 'muted',
+    zh ? 'Pulsedive 風險等級' : 'Pulsedive risk level',
+    pd?.threats?.length ? `${zh?'威脅：':'Threats: '}${pd.threats.filter(Boolean).join(', ').slice(0,60)}` : ''
+  );
+
+  // ── Criminal IP ──
+  const cip = r.criminalip;
+  setEngCard('res-criminalip', 'res-criminalip-sub',
+    cip, cip?.score,
+    v => `${v} / 100`,
+    v => Number(v) >= 70 ? 'danger' : Number(v) >= 30 ? 'warn' : 'safe',
+    zh ? 'Criminal IP 風險分數' : 'Criminal IP risk score',
+    cip?.verdict ? `${zh?'判定：':'Verdict: '}${cip.verdict}` : ''
+  );
+
+  // ── Google Safe Browsing ──
+  const gsb = r.google_safebrowsing;
+  setEngCard('res-gsb', 'res-gsb-sub',
+    gsb, gsb?.matches,
+    v => `${v} ${zh?'筆威脅命中':'threat matches'}`,
+    v => Number(v) > 0 ? 'danger' : 'safe',
+    zh ? 'Google Safe Browsing 命中' : 'GSB threat matches',
+    gsb?.skipped ? (zh?'無可提取的 URL':'No URLs extracted from file') : ''
+  );
+
+  // ── AbuseIPDB ──
+  const ab = r.abuseipdb;
+  setEngCard('res-abuseipdb', 'res-abuseipdb-sub',
+    ab, ab?.max_abuse_score,
+    v => `${v} / 100`,
+    v => Number(v) >= 80 ? 'danger' : Number(v) >= 40 ? 'warn' : 'safe',
+    zh ? `AbuseIPDB 最高濫用分數（${ab?.ips_checked??0} IPs）` : `AbuseIPDB max score (${ab?.ips_checked??0} IPs)`,
+    ab?.skipped ? (zh?'無可提取的公網 IP':'No public IPs extracted') : ''
+  );
+}
+
+/**
+ * setEngCard — 統一設定延伸引擎卡片
+ * @param {string}   valId    - 數值元素 id
+ * @param {string}   subId    - 副標題元素 id
+ * @param {object}   report   - engine report object
+ * @param {any}      rawVal   - 主要顯示值
+ * @param {function} fmtFn    - 格式化值的函式
+ * @param {function} colorFn  - 返回 CSS class (danger/warn/safe/muted)
+ * @param {string}   subMain  - 主副標題文字
+ * @param {string}   subExtra - 額外副標題文字
+ */
+function setEngCard(valId, subId, report, rawVal, fmtFn, colorFn, subMain, subExtra) {
+  const valEl = document.getElementById(valId);
+  const subEl = document.getElementById(subId);
+  if(!valEl || !subEl) return;
+
+  if(!report || report.error === 'not_configured') {
+    valEl.textContent = currentLang==='zh' ? '未設定 API Key' : 'API Key not set';
+    valEl.className   = 'card-val muted';
+    subEl.textContent = '';
+    return;
+  }
+  if(report.error) {
+    valEl.textContent = `Error: ${report.error}`;
+    valEl.className   = 'card-val muted';
+    subEl.textContent = (report.detail||'').slice(0,80);
+    return;
+  }
+  if(report.skipped) {
+    valEl.textContent = currentLang==='zh' ? '跳過（無 IOC）' : 'Skipped (no IOC)';
+    valEl.className   = 'card-val muted';
+    subEl.textContent = subExtra || '';
+    return;
+  }
+  if(rawVal === null || rawVal === undefined) {
+    valEl.textContent = '—';
+    valEl.className   = 'card-val muted';
+    subEl.textContent = subMain || '';
+    return;
+  }
+
+  valEl.textContent = fmtFn(rawVal);
+  valEl.className   = 'card-val ' + colorFn(rawVal);
+  subEl.textContent = subExtra || subMain || '';
+}
+
+
 function renderEngineGrid(scans) {
   const grid = document.getElementById('eng-grid');
   if(!scans || Object.keys(scans).length === 0) {
